@@ -1,0 +1,432 @@
+
+:host {
+  display: block;
+  min-height: 100vh;
+}
+
+.login-page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  position: relative;
+  overflow: hidden;
+  padding: 30px 16px;
+  background:
+    radial-gradient(circle at 15% 15%, #283d75 0, transparent 36%),
+    radial-gradient(circle at 85% 80%, #43276e 0, transparent 35%),
+    #090e1c;
+  color: #edf2ff;
+  font-family: Inter, Arial, sans-serif;
+}
+
+.background-shape {
+  position: absolute;
+  border: 1px solid #8eacff20;
+  border-radius: 28px;
+  pointer-events: none;
+  animation: floatShape 8s ease-in-out infinite;
+}
+
+.shape-one {
+  width: 160px;
+  height: 160px;
+  top: 9%;
+  left: 8%;
+  transform: rotate(24deg);
+}
+
+.shape-two {
+  width: 110px;
+  height: 110px;
+  right: 8%;
+  top: 18%;
+  border-radius: 50%;
+  animation-delay: -3s;
+}
+
+.shape-three {
+  width: 190px;
+  height: 190px;
+  right: 14%;
+  bottom: 6%;
+  transform: rotate(42deg);
+  animation-delay: -5s;
+}
+
+.login-container {
+  width: 100%;
+  max-width: 465px;
+  position: relative;
+  z-index: 1;
+  padding: 32px;
+  border: 1px solid #ffffff18;
+  border-radius: 24px;
+  background: #10182adf;
+  backdrop-filter: blur(22px);
+  box-shadow: 0 30px 100px #0005;
+  animation: appear 650ms ease both;
+}
+
+.brand-section {
+  text-align: center;
+}
+
+.brand-icon {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  margin: 0 auto 12px;
+  border-radius: 15px;
+  color: white;
+  font-size: 25px;
+  font-weight: 800;
+  background: linear-gradient(135deg, #438cff, #8955ef);
+  box-shadow: 0 9px 30px #477cfb55;
+}
+
+.brand-section h1 {
+  margin: 0;
+  font-size: 23px;
+  letter-spacing: -0.7px;
+}
+
+.brand-section h1 span {
+  color: #83a9ff;
+}
+
+.brand-section p {
+  color: #8e9db9;
+  font-size: 11px;
+}
+
+.visual-section {
+  position: relative;
+  margin: 26px 0 30px;
+  padding: 15px 0;
+  perspective: 900px;
+}
+
+.scene {
+  display: grid;
+  place-items: center;
+  perspective: 1000px;
+}
+
+.bank-card {
+  width: min(100%, 285px);
+  height: 164px;
+  padding: 19px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border: 1px solid #ffffff4a;
+  border-radius: 16px;
+  background:
+    radial-gradient(circle at 90% 15%, #ffffff32, transparent 28%),
+    linear-gradient(130deg, #326fe2, #624ce2 65%, #9a56e5);
+  box-shadow: 0 23px 45px #0005;
+  transform-style: preserve-3d;
+  animation: cardFloat 5s ease-in-out infinite;
+}
+
+.card-top,
+.card-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.card-chip {
+  width: 33px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  border-radius: 6px;
+  color: #343b69;
+  background: linear-gradient(135deg, #fff0b3, #c4a55e);
+}
+
+.card-symbol {
+  font-size: 25px;
+  color: #ffffffc9;
+}
+
+.card-number {
+  font-size: 15px;
+  letter-spacing: 2px;
+  text-shadow: 0 2px 8px #0002;
+}
+
+.card-bottom small,
+.card-bottom strong {
+  display: block;
+}
+
+.card-bottom small {
+  margin-bottom: 5px;
+  color: #ffffffa9;
+  font-size: 8px;
+  letter-spacing: 1.4px;
+}
+
+.card-bottom strong {
+  font-size: 10px;
+  letter-spacing: 0.7px;
+}
+
+.card-logo {
+  width: 31px;
+  height: 31px;
+  display: grid;
+  place-items: center;
+  border: 2px solid #ffffffb5;
+  border-radius: 10px;
+  font-weight: 900;
+}
+
+.floating-badge {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 12px;
+  border: 1px solid #ffffff21;
+  border-radius: 9px;
+  color: #e8eeff;
+  background: #18233bdd;
+  box-shadow: 0 10px 30px #0003;
+  font-size: 9px;
+  animation: badgeFloat 4s ease-in-out infinite;
+}
+
+.floating-badge span {
+  color: #6ee7b7;
+  font-weight: 900;
+}
+
+.badge-one {
+  top: 4px;
+  right: 0;
+}
+
+.badge-two {
+  bottom: 2px;
+  left: 0;
+  animation-delay: -2s;
+}
+
+.welcome-text {
+  margin-bottom: 23px;
+}
+
+.eyebrow {
+  color: #83a9ff;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 2px;
+}
+
+.welcome-text h2 {
+  margin: 9px 0;
+  font-size: 25px;
+  letter-spacing: -0.7px;
+}
+
+.welcome-text p {
+  margin: 0;
+  color: #94a2bd;
+  font-size: 12px;
+}
+
+.form-field {
+  margin-bottom: 18px;
+}
+
+.form-field label {
+  display: block;
+  margin-bottom: 9px;
+  color: #dbe4f8;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 0 13px;
+  border: 1px solid #34435e;
+  border-radius: 10px;
+  background: #0b1221;
+  transition: border-color 180ms, box-shadow 180ms;
+}
+
+.input-wrapper:focus-within {
+  border-color: #6897ff;
+  box-shadow: 0 0 0 3px #6897ff19;
+}
+
+.input-icon {
+  color: #8094ba;
+  font-size: 17px;
+}
+
+.input-wrapper input {
+  width: 100%;
+  min-width: 0;
+  border: none;
+  outline: none;
+  color: #f0f4ff;
+  background: transparent;
+  font-size: 12px;
+}
+
+.input-wrapper input::placeholder {
+  color: #64738f;
+}
+
+.password-toggle {
+  padding: 5px;
+  border: 0;
+  color: #91afff;
+  background: transparent;
+  font-size: 10px;
+  cursor: pointer;
+}
+
+.login-button {
+  width: 100%;
+  min-height: 49px;
+  margin-top: 5px;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: none;
+  border-radius: 10px;
+  color: white;
+  background: linear-gradient(105deg, #367df5, #7650eb);
+  box-shadow: 0 10px 25px #4679f72e;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 180ms, box-shadow 180ms;
+}
+
+.login-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 30px #4679f745;
+}
+
+.login-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.button-arrow {
+  font-size: 18px;
+}
+
+.error-message {
+  margin: 12px 0;
+  padding: 11px;
+  border: 1px solid #ff748533;
+  border-radius: 8px;
+  color: #ffacba;
+  background: #d83b5420;
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.security-note {
+  margin: 22px 0 0;
+  color: #8291ad;
+  font-size: 10px;
+  line-height: 1.8;
+  text-align: center;
+}
+
+.security-note span {
+  color: #6ee7b7;
+}
+
+.login-footer {
+  margin-top: 23px;
+  padding-top: 17px;
+  border-top: 1px solid #ffffff12;
+  color: #6f7e99;
+  font-size: 9px;
+  text-align: center;
+}
+
+@keyframes cardFloat {
+  0%, 100% {
+    transform: rotateX(3deg) rotateY(-8deg) translateY(0);
+  }
+
+  50% {
+    transform: rotateX(-2deg) rotateY(8deg) translateY(-8px);
+  }
+}
+
+@keyframes badgeFloat {
+  0%, 100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-7px);
+  }
+}
+
+@keyframes floatShape {
+  0%, 100% {
+    translate: 0 0;
+  }
+
+  50% {
+    translate: 0 -20px;
+  }
+}
+
+@keyframes appear {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 480px) {
+  .login-container {
+    padding: 24px 19px;
+  }
+
+  .bank-card {
+    height: 145px;
+  }
+
+  .card-number {
+    font-size: 12px;
+  }
+
+  .floating-badge {
+    font-size: 8px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+}
