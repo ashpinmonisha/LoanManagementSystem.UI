@@ -1,0 +1,68 @@
+<div class="page">
+  <a class="back" routerLink="/dashboard">&larr; Back to dashboard</a>
+
+  @if (loading) {
+    <p class="state">Loading application...</p>
+  } @else if (!loan) {
+    <p class="error">{{ errorMessage }}</p>
+    <button class="btn" (click)="loadLoan()">Try again</button>
+  } @else {
+    <div class="card">
+      <div class="header">
+        <h1>Application #{{ loan.loanApplicationId }}</h1>
+        <span [class]="'badge ' + statusClass">
+          {{ loan.status }}
+        </span>
+      </div>
+
+      <div class="grid">
+        <div><span class="label">Customer</span>{{ loan.customerId }}</div>
+        <div><span class="label">Loan type</span>{{ loan.loanType }}</div>
+        <div>
+          <span class="label">Amount</span>
+          {{ loan.loanAmount | currency: 'INR' : 'symbol' : '1.0-0' }}
+        </div>
+        <div><span class="label">Tenure</span>{{ loan.loanTenure }} months</div>
+        <div><span class="label">Purpose</span>{{ loan.loanPurpose || '-' }}</div>
+        <div><span class="label">Remarks</span>{{ loan.remarks || '-' }}</div>
+      </div>
+
+      @if (successMessage) {
+        <div class="success">{{ successMessage }}</div>
+      }
+      @if (errorMessage) {
+        <div class="error">{{ errorMessage }}</div>
+      }
+
+      @if (isPending) {
+        <label class="label" for="remarks">Remarks</label>
+        <textarea
+          id="remarks"
+          name="remarks"
+          rows="3"
+          placeholder="Add remarks (required for rejection)"
+          [(ngModel)]="remarks"
+        ></textarea>
+
+        <div class="actions">
+          <button class="btn approve" [disabled]="saving" (click)="decide(true)">
+            Approve
+          </button>
+          <button class="btn reject" [disabled]="saving" (click)="decide(false)">
+            Reject
+          </button>
+          <a class="btn" [routerLink]="['/risk-assessment', loanId]">
+            Risk assessment
+          </a>
+        </div>
+      } @else {
+        <p class="state">This application has already been decided.</p>
+        <div class="actions">
+          <a class="btn" [routerLink]="['/risk-assessment', loanId]">
+            Risk assessment
+          </a>
+        </div>
+      }
+    </div>
+  }
+</div>

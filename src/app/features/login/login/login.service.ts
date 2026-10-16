@@ -1,58 +1,81 @@
-
-import { Injectable, inject } from '@angular/core';
+import { Injectable, PLATFORM_ID, inject } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
-
-export interface EmployeeLoginRequest {
-  employeeId: number;
-  password: string;
-}
-
-export interface EmployeeLoginResponse {
-  token: string;
-  employeeId?: number;
-  employeeName?: string;
-  role?: string;
-  message?: string;
-}
+import {
+  EmployeeLoginRequest,
+  EmployeeLoginResponse
+} from '../../../core/models/loan.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class LoginService {
   private readonly http = inject(HttpClient);
+  private readonly platformId = inject(PLATFORM_ID);
 
-  // Change this to the HTTPS URL of your running backend.
   private readonly apiUrl = 'https://localhost:7085/api/Employee';
+  private readonly storageKey = 'employee';
+
+  // sessionStorage does not exist on the server when SSR is on
+  private get storage(): Storage | null {
+    return isPlatformBrowser(this.platformId) ? sessionStorage : null;
+  }
 
   login(
     credentials: EmployeeLoginRequest
   ): Observable<EmployeeLoginResponse> {
     return this.http
-      .post<EmployeeLoginResponse>(
-        `${this.apiUrl}/login`,
-        credentials
-      )
+      .post<EmployeeLoginResponse>(`${this.apiUrl}/login`, credentials)
       .pipe(
         tap(response => {
-          if (!response.token) {
-            throw new Error('The login response did not contain a JWT.');
-          }
-
-          sessionStorage.setItem('token', response.token);
+          this.storage?.setItem(
+            this.storageKey,
+            JSON.stringify(response.employee)
+          );
         })
       );
   }
 
-  logout(): void {
-    sessionStorage.removeItem('token');
+  getEmployee(): EmployeeLoginResponse['employee'] | null {
+    const value = this.storage?.getItem(this.storageKey);
+
+    if (!value) {
+      return null;
+    }
+
+    try {
+      return JSON.parse(value);
+    } catch {
+      return null;
+    }
   }
 
   getToken(): string | null {
-    return sessionStorage.getItem('token');
+    return this.getEmployee()?.token ?? null;
+  }
+
+  logout(): void {
+    this.storage?.removeItem(this.storageKey);
   }
 
   isLoggedIn(): boolean {
-    return !!this.getToken();
+    const token = this.getToken();
+
+    if (!token) {
+      return false;
+    }
+
+    try {
+      const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+      const payload = JSON.parse(atob(base64));
+      return !payload.exp || payload.exp * 1000 > Date.now();
+    } catch {
+      return false;
+    }
+  }
+
+  isEmployee(): boolean {
+    return this.getEmployee()?.role?.toLowerCase() === 'employee';
   }
 }

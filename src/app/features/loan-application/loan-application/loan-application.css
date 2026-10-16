@@ -1,0 +1,149 @@
+
+:host {
+  display: block;
+  min-height: 100vh;
+  color: #edf2ff;
+  background: #0a1020;
+  font-family: Inter, Arial, sans-serif;
+}
+
+.page {
+  max-width: 850px;
+  margin: auto;
+  padding: 36px 20px;
+}
+
+.back-link {
+  display: inline-block;
+  margin-bottom: 22px;
+  color: #8db0ff;
+  font-size: 12px;
+  text-decoration: none;
+}
+
+.application-card {
+  padding: 32px;
+  border: 1px solid #283751;
+  border-radius: 18px;
+  background: linear-gradient(145deg, #151f34, #101829);
+  box-shadow: 0 25px 70px #0002;
+  animation: enter 450ms ease both;
+}
+
+.eyebrow {
+  color: #83a9ff;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 2px;
+}
+
+.heading h1 {
+  margin: 12px 0;
+  font-size: 27px;
+}
+
+.heading p {
+  margin-bottom: 28px;
+  color: #94a2bd;
+  font-size: 12px;
+}
+
+form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.full {
+  grid-column: 1 / -1;
+}
+
+label {
+  color: #dbe4f8;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+input,
+select,
+textarea {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 46px;
+  padding: 12px;
+  border: 1px solid #34435e;
+  border-radius: 9px;
+  outline: none;
+  color: #edf2ff;
+  background: #0b1221;
+  font: inherit;
+  font-size: 12px;
+}
+
+textarea {
+  resize: vertical;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: #6897ff;
+  box-shadow: 0 0 0 3px #6897ff15;
+}
+
+.submit-button {
+  grid-column: 1 / -1;
+  min-height: 49px;
+  border: 0;
+  border-radius: 10px;
+  color: white;
+  background: linear-gradient(105deg, #367df5, #7650eb);
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.submit-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.error {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: #ff9eaa;
+  font-size: 12px;
+}
+
+@keyframes enter {
+  from {
+    opacity: 0;
+    transform: perspective(900px) rotateX(3deg) translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: perspective(900px) rotateX(0) translateY(0);
+  }
+}
+
+@media (max-width: 600px) {
+  .application-card {
+    padding: 22px 16px;
+  }
+
+  form {
+    grid-template-columns: 1fr;
+  }
+
+  .full,
+  .submit-button,
+  .error {
+    grid-column: auto;
+  }
+}

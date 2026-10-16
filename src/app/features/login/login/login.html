@@ -1,125 +1,39 @@
-
 <div class="login-page">
-  <div class="background-shape shape-one"></div>
-  <div class="background-shape shape-two"></div>
-  <div class="background-shape shape-three"></div>
+  <form class="login-card" (ngSubmit)="submitLogin()">
+    <h1>Loan Management System</h1>
+    <p class="subtitle">Employee Login</p>
 
-  <section class="login-container">
+    @if (errorMessage) {
+      <div class="error">{{ errorMessage }}</div>
+    }
 
-    <div class="brand-section">
-      <div class="brand-icon">₹</div>
-      <h1>Loan<span>Sphere</span></h1>
-      <p>Loan Management System</p>
+    <label for="employeeCode">Employee code</label>
+    <input
+      id="employeeCode"
+      name="employeeCode"
+      type="text"
+      placeholder="Enter employee code"
+      autocomplete="username"
+      [(ngModel)]="employeeCode"
+    />
+
+    <label for="password">Password</label>
+    <div class="password-row">
+      <input
+        id="password"
+        name="password"
+        [type]="showPassword ? 'text' : 'password'"
+        placeholder="Enter password"
+        autocomplete="current-password"
+        [(ngModel)]="password"
+      />
+      <button type="button" class="toggle" (click)="showPassword = !showPassword">
+        {{ showPassword ? 'Hide' : 'Show' }}
+      </button>
     </div>
 
-    <div class="visual-section">
-      <div class="scene">
-        <div class="bank-card">
-          <div class="card-top">
-            <span class="card-chip">▦</span>
-            <span class="card-symbol">✦</span>
-          </div>
-
-          <div class="card-number">•••• •••• •••• 2026</div>
-
-          <div class="card-bottom">
-            <div>
-              <small>EMPLOYEE PORTAL</small>
-              <strong>LOAN MANAGEMENT</strong>
-            </div>
-            <span class="card-logo">L</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="floating-badge badge-one">
-        <span>✓</span> Secure Access
-      </div>
-
-      <div class="floating-badge badge-two">
-        <span>↗</span> Smart Lending
-      </div>
-    </div>
-
-    <div class="form-section">
-      <div class="welcome-text">
-        <span class="eyebrow">EMPLOYEE PORTAL</span>
-        <h2>Welcome back</h2>
-        <p>Sign in to manage loan applications.</p>
-      </div>
-
-      <form #loginForm="ngForm" (ngSubmit)="submitLogin()">
-
-        <div class="form-field">
-          <label for="employeeId">Employee ID</label>
-
-          <div class="input-wrapper">
-            <span class="input-icon">♙</span>
-
-            <input
-              id="employeeId"
-              name="employeeId"
-              type="number"
-              [(ngModel)]="employeeId"
-              placeholder="Enter employee ID"
-              min="1"
-              required
-            />
-          </div>
-        </div>
-
-        <div class="form-field">
-          <label for="password">Password</label>
-
-          <div class="input-wrapper">
-            <span class="input-icon">♙</span>
-
-            <input
-              id="password"
-              name="password"
-              [type]="showPassword ? 'text' : 'password'"
-              [(ngModel)]="password"
-              placeholder="Enter your password"
-              required
-            />
-
-            <button
-              class="password-toggle"
-              type="button"
-              (click)="showPassword = !showPassword"
-              [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
-            >
-              {{ showPassword ? 'Hide' : 'Show' }}
-            </button>
-          </div>
-        </div>
-
-        <div class="error-message" *ngIf="errorMessage">
-          {{ errorMessage }}
-        </div>
-
-        <button
-          class="login-button"
-          type="submit"
-          [disabled]="loading || !loginForm.valid"
-        >
-          <span>
-            {{ loading ? 'Signing in...' : 'Sign in to dashboard' }}
-          </span>
-          <span class="button-arrow">→</span>
-        </button>
-
-      </form>
-
-      <p class="security-note">
-        <span>♢</span>
-        Your employee account is protected by authentication.
-      </p>
-    </div>
-
-    <footer class="login-footer">
-      © 2026 LoanSphere · Employee access
-    </footer>
-
-  </section>
+    <button type="submit" class="submit" [disabled]="loading">
+      {{ loading ? 'Signing in...' : 'Sign in' }}
+    </button>
+  </form>
 </div>

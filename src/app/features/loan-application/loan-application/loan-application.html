@@ -1,0 +1,90 @@
+
+<main class="page">
+  <a routerLink="/dashboard" class="back-link">← Back to dashboard</a>
+
+  <section class="application-card">
+    <div class="heading">
+      <span class="eyebrow">LOAN MANAGEMENT</span>
+      <h1>Create loan application</h1>
+      <p>Enter the customer and loan details below.</p>
+    </div>
+
+    <form #loanForm="ngForm" (ngSubmit)="submit()">
+      <div class="field">
+        <label for="customerId">Customer ID</label>
+        <input
+          id="customerId"
+          name="customerId"
+          type="number"
+          min="1"
+          [(ngModel)]="customerId"
+          required
+        />
+      </div>
+
+      <div class="field">
+        <label for="loanType">Loan type</label>
+        <select
+          id="loanType"
+          name="loanType"
+          [(ngModel)]="loanType"
+          required
+        >
+          <option value="Personal">Personal</option>
+          <option value="Home">Home</option>
+          <option value="Education">Education</option>
+          <option value="Vehicle">Vehicle</option>
+          <option value="Business">Business</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="loanAmount">Loan amount (₹)</label>
+        <input
+          id="loanAmount"
+          name="loanAmount"
+          type="number"
+          min="1"
+          step="0.01"
+          [(ngModel)]="loanAmount"
+          required
+        />
+      </div>
+
+      <div class="field">
+        <label for="loanTenure">Loan tenure (months)</label>
+        <input
+          id="loanTenure"
+          name="loanTenure"
+          type="number"
+          min="1"
+          step="1"
+          [(ngModel)]="loanTenure"
+          required
+        />
+      </div>
+
+      <div class="field full">
+        <label for="loanPurpose">Loan purpose</label>
+        <textarea
+          id="loanPurpose"
+          name="loanPurpose"
+          rows="4"
+          maxlength="500"
+          [(ngModel)]="loanPurpose"
+          required
+        ></textarea>
+      </div>
+
+      <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
+
+      <button
+        class="submit-button"
+        type="submit"
+        [disabled]="loading || !loanForm.valid"
+      >
+        {{ loading ? 'Submitting...' : 'Submit application →' }}
+      </button>
+    </form>
+  </section>
+</main>

@@ -1,0 +1,135 @@
+
+<div class="dashboard">
+  <header class="topbar">
+    <a class="brand" routerLink="/dashboard">
+      <span class="brand-icon">₹</span>
+      LoanSphere
+    </a>
+
+    <div class="employee-info">
+      <div class="avatar">
+        {{ employee?.employeeName?.charAt(0) || 'E' }}
+      </div>
+
+      <div class="employee-name">
+        <strong>{{ employee?.employeeName || 'Employee' }}</strong>
+        <small>{{ employee?.employeeCode }}</small>
+      </div>
+
+      <button class="logout-button" (click)="logout()">
+        Logout
+      </button>
+    </div>
+  </header>
+
+  <main class="content">
+    <section class="welcome">
+      <div>
+        <span class="eyebrow">EMPLOYEE WORKSPACE</span>
+        <h1>Welcome back, {{ employee?.employeeName }}!</h1>
+        <p>Manage applications, review decisions and assess loan risk.</p>
+      </div>
+
+      <a routerLink="/loan-application" class="primary-button">
+        + New application
+      </a>
+    </section>
+
+    <section class="stats">
+      <article class="stat-card">
+        <span>Total applications</span>
+        <strong>{{ applications.length }}</strong>
+        <small>Applications returned by the API</small>
+      </article>
+
+      <article class="stat-card pending">
+        <span>Pending review</span>
+        <strong>{{ pendingCount }}</strong>
+        <small>Awaiting a decision</small>
+      </article>
+
+      <article class="stat-card approved">
+        <span>Approved</span>
+        <strong>{{ approvedCount }}</strong>
+        <small>Approved applications</small>
+      </article>
+
+      <article class="stat-card rejected">
+        <span>Rejected</span>
+        <strong>{{ rejectedCount }}</strong>
+        <small>Rejected applications</small>
+      </article>
+    </section>
+
+    <section class="applications-panel">
+      <div class="panel-header">
+        <div>
+          <h2>Loan applications</h2>
+          <p>Review applications retrieved from your backend.</p>
+        </div>
+
+        <button
+          class="secondary-button"
+          (click)="ngOnInit()"
+        >
+          Refresh
+        </button>
+      </div>
+
+      <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
+
+      <div class="loading" *ngIf="loading">
+        Loading applications...
+      </div>
+
+      <div class="table-scroll" *ngIf="!loading">
+        <table>
+          <thead>
+            <tr>
+              <th>Application</th>
+              <th>Customer</th>
+              <th>Loan type</th>
+              <th>Amount</th>
+              <th>Tenure</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr *ngFor="let loan of applications">
+              <td>#{{ loan.loanApplicationId }}</td>
+              <td>{{ loan.customerId }}</td>
+              <td>{{ loan.loanType }}</td>
+              <td>{{ loan.loanAmount | currency:'INR':'symbol':'1.0-0' }}</td>
+              <td>{{ loan.loanTenure }} months</td>
+              <td>
+                <span class="status" [ngClass]="loan.status.toLowerCase()">
+                  {{ loan.status }}
+                </span>
+              </td>
+              <td>
+                <a [routerLink]="['/loan-approval', loan.loanApplicationId]">
+                  Review →
+                </a>
+              </td>
+            </tr>
+
+            <tr *ngIf="applications.length === 0">
+              <td colspan="7" class="empty">
+                No loan applications found.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="quick-links">
+      <a routerLink="/loan-application">Create loan application →</a>
+     <a [routerLink]="['/risk-assessment', 1005]">
+  Open risk assessment →
+</a>
+    </section>
+  </main>
+</div>
