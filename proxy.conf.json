@@ -1,7 +1,15 @@
 {
+<<<<<<< HEAD
   "/api/**": {
+=======
+  "/api": {
+>>>>>>> origin/jousha
     "target": "https://localhost:7085",
     "secure": false,
     "changeOrigin": true
   }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> origin/jousha
