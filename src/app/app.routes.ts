@@ -2,15 +2,12 @@ import { Routes } from '@angular/router';
 
 import { authGuard } from './core/guards/auth.guard';
 import { LoginComponent } from './features/login/login/login';
-<<<<<<< HEAD
 
 import { LoanApplicationComponent } from './features/loan-application/loan-application/loan-application';
 import { LoanApprovalComponent } from './features/loan-approval/loan-approval';
 import { RiskAssessmentComponent } from './features/risk-assessment/risk-assessment';
 import { DashboardComponent } from './features/dashboard/Dashboard';
-=======
 import { EMI_ROUTES } from './emi.routes';
->>>>>>> origin/jousha
 
 export const routes: Routes = [
   {
