@@ -1,0 +1,52 @@
+<div class="payment-page">
+  <div class="glass-panel">
+    <div class="section-heading">
+      <span class="eyebrow">MODULE 4.1</span>
+      <h2>Record Payment</h2>
+      <p>Enter the details of a loan payment.</p>
+    </div>
+
+    <div *ngIf="success" class="alert alert-success" role="status">{{ success }}</div>
+    <div *ngIf="error" class="alert alert-danger" role="alert">{{ error }}</div>
+    <section *ngIf="receipt" class="alert alert-success" aria-label="Recorded payment receipt">
+      <p>Payment #{{ receipt.paymentId }} · {{ receipt.amount | currency:'INR' }}</p>
+      <p>Status: {{ receipt.paymentStatus }}</p>
+      <button type="button" class="glossy-btn" (click)="downloadReceipt()">Download receipt</button>
+      <p>Downloads a printable receipt. Open it and use Print to save as PDF.</p>
+    </section>
+
+    <form #paymentForm="ngForm" (ngSubmit)="submitPayment()">
+      <label for="customerId">Customer ID</label>
+      <input id="customerId" type="number" class="form-control mb-3"
+        name="customerId" [(ngModel)]="payment.customerId" min="1" step="1" required>
+
+      <label for="loanId">Loan ID</label>
+      <input id="loanId" type="number" class="form-control mb-3"
+        name="loanId" [(ngModel)]="payment.loanId" min="1" step="1" required>
+
+      <label for="emiId">EMI ID</label>
+      <input id="emiId" type="number" class="form-control mb-3"
+        name="emiId" [(ngModel)]="payment.emiId" min="1" step="1" required>
+
+      <label for="amount">Payment Amount</label>
+      <input id="amount" type="number" class="form-control mb-3"
+        name="amount" [(ngModel)]="payment.amount" min="0.01" step="0.01" required>
+
+      <label for="paymentDate">Payment Date (ISO 8601)</label>
+      <input id="paymentDate" type="text" class="form-control mb-3"
+        name="paymentDate" [(ngModel)]="payment.paymentDate" required>
+
+      <label for="paymentMethod">Payment Method</label>
+      <input id="paymentMethod" type="text" class="form-control mb-3"
+        name="paymentMethod" [(ngModel)]="payment.paymentMethod" required>
+
+      <label for="paymentReference">Payment Reference</label>
+      <input id="paymentReference" type="text" class="form-control mb-4"
+        name="paymentReference" [(ngModel)]="payment.paymentReference" required>
+
+      <button type="submit" class="glossy-btn" [disabled]="loading || paymentForm.invalid">
+        {{ loading ? 'Recording payment...' : 'Record Payment' }}
+      </button>
+    </form>
+  </div>
+</div>

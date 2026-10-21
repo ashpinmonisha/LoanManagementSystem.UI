@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '../../../core/api-url';
 
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
@@ -9,7 +10,7 @@ import { LoanApplication, LoanApplicationRequest, LoanApplicationResponse } from
 })
 export class LoanApplicationService {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = 'https://localhost:7085/api/Loan';
+  private readonly apiUrl = API_BASE_URL + '/Loan';
 
   getApplications(): Observable<LoanApplication[]> {
     return this.http.get<LoanApplication[]>(

@@ -1,0 +1,66 @@
+.emi-page {
+  color: #edf3ff;
+  min-height: 100vh;
+}
+
+.emi-card {
+  color: #edf3ff;
+  background: linear-gradient(
+    135deg,
+    rgba(28, 40, 76, 0.96),
+    rgba(12, 20, 47, 0.96)
+  );
+
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
+
+  box-shadow:
+    0 15px 45px rgba(0, 0, 0, 0.22),
+    inset 0 1px rgba(255, 255, 255, 0.08);
+}
+
+.stat-box {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 18px;
+  height: 100%;
+}
+
+.stat-box small {
+  color: #aebbd7;
+}
+
+.stat-box h4 {
+  margin: 10px 0 0;
+  font-weight: 750;
+}
+
+.emi-card .form-control {
+  background: #101b37;
+  border: 1px solid #405073;
+  color: white;
+  padding: 11px;
+}
+
+.emi-card .form-control:focus {
+  background: #101b37;
+  color: white;
+  border-color: #8b80ff;
+  box-shadow: 0 0 0 3px rgba(139, 128, 255, 0.15);
+}
+
+.emi-card .form-label {
+  color: #c6d3ed;
+}
+
+.emi-card .table {
+  --bs-table-bg: transparent;
+  --bs-table-color: #e9f0ff;
+  --bs-table-border-color: #354363;
+}
+
+.emi-card .progress {
+  height: 9px;
+  background: #263653;
+}

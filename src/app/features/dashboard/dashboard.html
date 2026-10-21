@@ -1,135 +1,358 @@
-
-<div class="dashboard">
-  <header class="topbar">
-    <a class="brand" routerLink="/dashboard">
-      <span class="brand-icon">₹</span>
-      LoanSphere
-    </a>
-
-    <div class="employee-info">
-      <div class="avatar">
-        {{ employee?.employeeName?.charAt(0) || 'E' }}
-      </div>
-
-      <div class="employee-name">
-        <strong>{{ employee?.employeeName || 'Employee' }}</strong>
-        <small>{{ employee?.employeeCode }}</small>
-      </div>
-
-      <button class="logout-button" (click)="logout()">
-        Logout
-      </button>
-    </div>
-  </header>
-
-  <main class="content">
-    <section class="welcome">
-      <div>
-        <span class="eyebrow">EMPLOYEE WORKSPACE</span>
-        <h1>Welcome back, {{ employee?.employeeName }}!</h1>
-        <p>Manage applications, review decisions and assess loan risk.</p>
-      </div>
-
-      <a routerLink="/loan-application" class="primary-button">
-        + New application
-      </a>
-    </section>
-
-    <section class="stats">
-      <article class="stat-card">
-        <span>Total applications</span>
-        <strong>{{ applications.length }}</strong>
-        <small>Applications returned by the API</small>
-      </article>
-
-      <article class="stat-card pending">
-        <span>Pending review</span>
-        <strong>{{ pendingCount }}</strong>
-        <small>Awaiting a decision</small>
-      </article>
-
-      <article class="stat-card approved">
-        <span>Approved</span>
-        <strong>{{ approvedCount }}</strong>
-        <small>Approved applications</small>
-      </article>
-
-      <article class="stat-card rejected">
-        <span>Rejected</span>
-        <strong>{{ rejectedCount }}</strong>
-        <small>Rejected applications</small>
-      </article>
-    </section>
-
-    <section class="applications-panel">
-      <div class="panel-header">
-        <div>
-          <h2>Loan applications</h2>
-          <p>Review applications retrieved from your backend.</p>
+@if (isEmployee) {
+  <div class="dashboard">
+    <header class="topbar">
+      <a class="brand" routerLink="/dashboard"><span class="brand-icon">&#8377;</span>LoanSphere</a>
+      <label class="search-box"
+        ><input
+          aria-label="Search applications"
+          placeholder="Search applications..."
+          (input)="searchTerm = $any($event.target).value"
+      /></label>
+      <div class="employee-info">
+        <div class="avatar">{{ employee?.employeeName?.charAt(0) || 'E' }}</div>
+        <div class="employee-name">
+          <strong>{{ employee?.employeeName }}</strong
+          ><small>Employee</small>
         </div>
-
-        <button
-          class="secondary-button"
-          (click)="ngOnInit()"
-        >
-          Refresh
-        </button>
+        <button class="logout-button" (click)="logout()">Logout</button>
       </div>
-
-      <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
-
-      <div class="loading" *ngIf="loading">
-        Loading applications...
-      </div>
-
-      <div class="table-scroll" *ngIf="!loading">
-        <table>
-          <thead>
-            <tr>
-              <th>Application</th>
-              <th>Customer</th>
-              <th>Loan type</th>
-              <th>Amount</th>
-              <th>Tenure</th>
-              <th>Status</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            <tr *ngFor="let loan of applications">
-              <td>#{{ loan.loanApplicationId }}</td>
-              <td>{{ loan.customerId }}</td>
-              <td>{{ loan.loanType }}</td>
-              <td>{{ loan.loanAmount | currency:'INR':'symbol':'1.0-0' }}</td>
-              <td>{{ loan.loanTenure }} months</td>
-              <td>
-                <span class="status" [ngClass]="loan.status.toLowerCase()">
-                  {{ loan.status }}
-                </span>
-              </td>
-              <td>
-                <a [routerLink]="['/loan-approval', loan.loanApplicationId]">
-                  Review →
-                </a>
-              </td>
-            </tr>
-
-            <tr *ngIf="applications.length === 0">
-              <td colspan="7" class="empty">
-                No loan applications found.
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
-
-    <section class="quick-links">
-      <a routerLink="/loan-application">Create loan application →</a>
-     <a [routerLink]="['/risk-assessment', 1005]">
-  Open risk assessment →
-</a>
-    </section>
-  </main>
-</div>
+    </header>
+    <div class="workspace">
+      <aside class="sidebar">
+        <nav aria-label="Employee navigation">
+          <a class="active" routerLink="/dashboard" aria-current="page">Dashboard</a>
+          <a routerLink="/dashboard" fragment="growth">Growth overview</a>
+          <a routerLink="/dashboard" fragment="applications">Approve / Reject</a>
+          <a routerLink="/dashboard" fragment="payment-summary">Payment summary</a>
+          <a routerLink="/dashboard" fragment="notifications"
+            >Notifications ({{ notifications.length }})</a
+          >
+        </nav>
+        <div class="sidebar-footer">LoanSphere<small>Employee Portal</small></div>
+      </aside>
+      <main class="content">
+        <section class="welcome">
+          <div class="welcome-copy">
+            <span class="eyebrow">EMPLOYEE WORKSPACE</span>
+            <h1>Welcome, {{ employee?.employeeName || 'Employee' }}!</h1>
+            <p>Track money coming in, loan commitments and collection growth in one dashboard.</p>
+          </div>
+          <button
+            class="primary-button"
+            (click)="loadApplications()"
+            [disabled]="loading || paymentsLoading"
+          >
+            Refresh dashboard
+          </button>
+        </section>
+        <section id="growth" class="applications-panel growth-panel" aria-label="Growth dashboard">
+          <div class="panel-header">
+            <div>
+              <span class="eyebrow">BUSINESS OVERVIEW</span>
+              <h2>Money in &amp; money out</h2>
+              <p>All-time totals from your loan and payment records.</p>
+            </div>
+          </div>
+          @if (loading || paymentsLoading) {
+            <p role="status">Loading growth overview...</p>
+          } @else if (errorMessage) {
+            <p role="alert">Growth overview unavailable. Refresh to try again.</p>
+          } @else {
+            <div class="growth-metrics">
+              <article class="money-in">
+                <span>Money in</span
+                ><strong>{{ totalPaid | currency: 'INR' : 'symbol' : '1.2-2' }}</strong
+                ><small
+                  >Successful repayments received{{
+                    paymentDataIncomplete ? ' (partial data)' : ''
+                  }}</small
+                >
+              </article>
+              <article class="money-out">
+                <span>Money out · approved loans</span
+                ><strong>{{ approvedLoanAmount | currency: 'INR' : 'symbol' : '1.2-2' }}</strong
+                ><small>Approved loan amounts; disbursement unconfirmed</small>
+              </article>
+              <article [class.negative]="netMovement < 0">
+                <span>Net movement · estimate</span
+                ><strong>{{ netMovement | currency: 'INR' : 'symbol' : '1.2-2' }}</strong
+                ><small>Repayments minus approved loan amounts</small>
+              </article>
+              <article>
+                <span>Collections / approved amount</span
+                ><strong>{{
+                  collectionRatio === null ? '—' : (collectionRatio | number: '1.0-1') + '%'
+                }}</strong
+                ><small>All-time repayment comparison</small>
+              </article>
+            </div>
+            @if (paymentDataIncomplete) {
+              <p class="error" role="alert">
+                Payment data is incomplete. Money in, net movement and collection figures are
+                partial.
+              </p>
+            }
+            <div class="growth-heading">
+              <div>
+                <h3>Monthly movement</h3>
+                <p>Repayments received and loans approved each month</p>
+              </div>
+              <div class="period-switch" aria-label="Chart period">
+                <button
+                  type="button"
+                  [attr.aria-pressed]="growthMonths === 6"
+                  (click)="growthMonths = 6"
+                >
+                  6 months</button
+                ><button
+                  type="button"
+                  [attr.aria-pressed]="growthMonths === 12"
+                  (click)="growthMonths = 12"
+                >
+                  12 months
+                </button>
+              </div>
+            </div>
+            <div class="chart-legend">
+              <span class="incoming-key">Money in</span
+              ><span class="outgoing-key">Approved loans</span>
+            </div>
+            <div
+              class="growth-chart"
+              role="img"
+              aria-label="Monthly comparison of repayments received and approved loan amounts. Exact values appear in the table below."
+            >
+              @for (month of growthData; track month.label) {
+                <div class="month-column">
+                  <div class="month-bars">
+                    <div
+                      class="incoming-bar"
+                      [style.height.%]="(month.incoming / growthScale) * 100"
+                      [title]="'Money in: ' + (month.incoming | currency: 'INR')"
+                    ></div>
+                    <div
+                      class="outgoing-bar"
+                      [style.height.%]="(month.outgoing / growthScale) * 100"
+                      [title]="'Approved loans: ' + (month.outgoing | currency: 'INR')"
+                    ></div>
+                  </div>
+                  <span>{{ month.label }}</span>
+                </div>
+              }
+            </div>
+            <details class="growth-details">
+              <summary>View monthly amounts</summary>
+              <div class="table-scroll">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Month</th>
+                      <th>Money in</th>
+                      <th>Approved loans</th>
+                      <th>Net estimate</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (month of growthData; track month.label) {
+                      <tr>
+                        <td>{{ month.label }}</td>
+                        <td>{{ month.incoming | currency: 'INR' : 'symbol' : '1.2-2' }}</td>
+                        <td>{{ month.outgoing | currency: 'INR' : 'symbol' : '1.2-2' }}</td>
+                        <td>
+                          {{
+                            month.incoming - month.outgoing | currency: 'INR' : 'symbol' : '1.2-2'
+                          }}
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            </details>
+            <p class="summary-note">
+              Money out uses approved loan amounts because disbursement records are unavailable. Net
+              movement is an estimate, not profit. Monthly figures use payment dates and loan review
+              dates; records without valid dates are excluded from the chart.
+            </p>
+          }
+        </section>
+        <section class="stats" aria-label="Application statistics">
+          <article class="stat-card pending">
+            <div>
+              <span>Awaiting decision</span><strong>{{ pendingCount }}</strong
+              ><small>Applications to approve or reject</small>
+            </div>
+          </article>
+          <article class="stat-card approved">
+            <div>
+              <span>Approved</span><strong>{{ approvedCount }}</strong
+              ><small>Approved applications</small>
+            </div>
+          </article>
+          <article class="stat-card rejected">
+            <div>
+              <span>Rejected</span><strong>{{ rejectedCount }}</strong
+              ><small>Rejected applications</small>
+            </div>
+          </article>
+          <article class="stat-card total">
+            <div>
+              <span>Notifications</span><strong>{{ notifications.length }}</strong
+              ><small>Items needing attention</small>
+            </div>
+          </article>
+        </section>
+        <section id="payment-summary" class="applications-panel">
+          <div class="panel-header">
+            <div>
+              <h2>Payment summary</h2>
+              <p>Payments and outstanding balances for approved and active loans.</p>
+            </div>
+          </div>
+          @if (loading || paymentsLoading) {
+            <p role="status">Loading payment totals...</p>
+          } @else if (errorMessage) {
+            <p>Payment totals unavailable because applications could not be loaded.</p>
+          } @else {
+            <div class="payment-totals">
+              <div>
+                <span>{{
+                  paymentDataIncomplete ? 'Amount paid (available records)' : 'Total amount paid'
+                }}</span
+                ><strong>{{ totalPaid | currency: 'INR' : 'symbol' : '1.2-2' }}</strong>
+              </div>
+              <div>
+                <span>{{
+                  paymentDataIncomplete
+                    ? 'Amount pending (available records)'
+                    : 'Total amount pending'
+                }}</span
+                ><strong>{{ totalPending | currency: 'INR' : 'symbol' : '1.2-2' }}</strong>
+              </div>
+            </div>
+            <p class="summary-note">
+              Paid totals include successful payments. Pending totals include the outstanding
+              principal, interest and charges returned by the payment API.
+            </p>
+            @if (paymentDataIncomplete) {
+              <p class="error" role="alert">
+                Some payment details are unavailable. Totals are incomplete.
+              </p>
+            }
+          }
+        </section>
+        <section id="notifications" class="applications-panel" aria-label="Employee notifications">
+          <div class="panel-header">
+            <div>
+              <h2>Notifications</h2>
+              <p>Current application and payment alerts. Updated when you refresh.</p>
+            </div>
+          </div>
+          @if (loading || paymentsLoading) {
+            <p role="status">Loading notifications...</p>
+          } @else if (errorMessage) {
+            <p>Notifications unavailable. Refresh to try again.</p>
+          } @else {
+            <ul class="notification-list">
+              @for (notification of notifications; track notification.message) {
+                <li>
+                  {{ notification.message }}
+                  <a
+                    routerLink="/dashboard"
+                    [fragment]="
+                      notification.loanId ? 'loan-' + notification.loanId : 'applications'
+                    "
+                    >View loan applications &rarr;</a
+                  >
+                </li>
+              } @empty {
+                <li>No items need attention.</li>
+              }
+            </ul>
+          }
+        </section>
+        <section id="applications" class="applications-panel">
+          <div class="panel-header">
+            <div>
+              <h2>Loan approvals and payments</h2>
+              <p>Select Approve / Reject to review an application and record your decision.</p>
+            </div>
+          </div>
+          <p class="error" *ngIf="errorMessage" role="alert">{{ errorMessage }}</p>
+          <div class="loading" *ngIf="loading" role="status">Loading applications...</div>
+          <div class="table-scroll" *ngIf="!loading && !errorMessage">
+            <table>
+              <thead>
+                <tr>
+                  <th>Loan</th>
+                  <th>Customer</th>
+                  <th>Loan amount</th>
+                  <th>Status</th>
+                  <th>Amount paid</th>
+                  <th>Amount pending</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (loan of filteredApplications; track loan.loanApplicationId) {
+                  <tr [id]="'loan-' + loan.loanApplicationId">
+                    <td>#{{ loan.loanApplicationId }}</td>
+                    <td>{{ loan.customerId }}</td>
+                    <td>{{ loan.loanAmount | currency: 'INR' : 'symbol' : '1.2-2' }}</td>
+                    <td>
+                      <span class="status" [ngClass]="loan.status.toLowerCase()">{{
+                        loan.status
+                      }}</span>
+                    </td>
+                    @if (
+                      loan.status.toLowerCase() === 'pending' ||
+                      loan.status.toLowerCase() === 'rejected'
+                    ) {
+                      <td>Not applicable</td>
+                      <td>Not applicable</td>
+                    } @else if (paymentsLoading) {
+                      <td>Loading...</td>
+                      <td>Loading...</td>
+                    } @else {
+                      <td>
+                        {{
+                          paymentSummary[loan.loanApplicationId]?.paid != null
+                            ? (paymentSummary[loan.loanApplicationId].paid
+                              | currency: 'INR' : 'symbol' : '1.2-2')
+                            : 'Unavailable'
+                        }}
+                      </td>
+                      <td>
+                        {{
+                          paymentSummary[loan.loanApplicationId]?.balance != null
+                            ? (paymentSummary[loan.loanApplicationId].balance!.totalOutstanding
+                              | currency: 'INR' : 'symbol' : '1.2-2')
+                            : 'Unavailable'
+                        }}
+                      </td>
+                    }
+                    <td>
+                      <a
+                        class="review-button"
+                        [routerLink]="['/loan-approval', loan.loanApplicationId]"
+                        >{{
+                          loan.status.toLowerCase() === 'pending'
+                            ? 'Approve / Reject'
+                            : 'View decision'
+                        }}</a
+                      >
+                    </td>
+                  </tr>
+                } @empty {
+                  <tr>
+                    <td colspan="7" class="empty">No matching loan applications.</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+}

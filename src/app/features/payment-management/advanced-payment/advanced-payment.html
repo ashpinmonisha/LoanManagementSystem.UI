@@ -1,0 +1,97 @@
+<div class="payment-page">
+  <div class="section-heading mb-4">
+    <span class="eyebrow">MODULE 4.4</span>
+    <h2>Advanced Payments</h2>
+    <p>Manage penalties and loan closure.</p>
+  </div>
+
+  <div *ngIf="message" class="alert alert-success">
+    {{ message }}
+  </div>
+
+  <div *ngIf="error" class="alert alert-danger">
+    {{ error }}
+  </div>
+
+  <div class="row g-4">
+
+    <!-- Penalty Management -->
+    <div class="col-lg-6">
+      <div class="glass-panel h-100">
+        <h3>Penalty Management</h3>
+        <p class="text-white-50">
+          Create late payment penalties.
+        </p>
+
+        <form #penaltyForm="ngForm"
+              (ngSubmit)="addPenalty()">
+
+          <label>Loan ID</label>
+          <input
+            type="number"
+            class="form-control mb-3"
+            name="loanId"
+            [(ngModel)]="penalty.loanId"
+            required>
+
+          <label>EMI ID</label>
+          <input
+            type="number"
+            class="form-control mb-3"
+            name="emiId"
+            [(ngModel)]="penalty.emiId"
+            required>
+
+          <label>Penalty Amount</label>
+          <input
+            type="number"
+            class="form-control mb-3"
+            name="amount"
+            [(ngModel)]="penalty.amount"
+            min="0.01"
+            required>
+
+          <label>Reason</label>
+          <textarea
+            class="form-control mb-4"
+            name="reason"
+            [(ngModel)]="penalty.reason">
+          </textarea>
+
+          <button
+            type="submit"
+            class="glossy-btn"
+            [disabled]="loading || penaltyForm.invalid">
+            Create Penalty
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Loan Closure -->
+    <div class="col-lg-6">
+      <div class="glass-panel h-100">
+        <h3>Loan Closure</h3>
+        <p class="text-white-50">
+          Request closure after all outstanding amounts
+          are settled.
+        </p>
+
+        <label>Loan ID</label>
+        <input
+          type="number"
+          class="form-control mb-4"
+          [(ngModel)]="closureLoanId"
+          placeholder="Enter Loan ID">
+
+        <button
+          class="glossy-btn"
+          [disabled]="loading"
+          (click)="closeLoan()">
+          Close Loan
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>

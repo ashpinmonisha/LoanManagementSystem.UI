@@ -1,0 +1,42 @@
+.balance-card {
+  padding: 25px;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.15);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  animation: floatIn 0.6s ease both;
+}
+
+.balance-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 15px 35px rgba(88,75,255,0.22);
+}
+
+.balance-card span {
+  color: #b8c6e8;
+}
+
+.balance-card h3,
+.balance-card h2 {
+  margin-top: 12px;
+  font-weight: 750;
+}
+
+.total-card {
+  background: linear-gradient(
+    120deg,
+    rgba(70,90,230,0.65),
+    rgba(145,70,235,0.55)
+  );
+}
+
+@keyframes floatIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

@@ -1,0 +1,80 @@
+<div class="payment-page">
+  <div class="glass-panel">
+
+    <div class="section-heading">
+      <span class="eyebrow">MODULE 4.3</span>
+      <h2>Outstanding Balance</h2>
+      <p>Monitor pending loan amounts and overdue payments.</p>
+    </div>
+
+    <div class="row g-3 mb-4">
+      <div class="col-md-8">
+        <input
+          type="number"
+          class="form-control"
+          placeholder="Enter Loan ID"
+          [(ngModel)]="loanId">
+      </div>
+
+      <div class="col-md-4">
+        <button
+          class="glossy-btn w-100"
+          (click)="loadBalance()">
+          Check Balance
+        </button>
+      </div>
+    </div>
+
+    <p *ngIf="loading">Loading balance...</p>
+
+    <div *ngIf="error" class="alert alert-danger">
+      {{ error }}
+    </div>
+
+    <div *ngIf="balance as b" class="row g-4">
+
+      <div class="col-md-6">
+        <div class="balance-card">
+          <span>Remaining Principal</span>
+          <h3>{{ b.remainingPrincipal | currency:'INR' }}</h3>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="balance-card">
+          <span>Remaining Interest</span>
+          <h3>{{ b.remainingInterest | currency:'INR' }}</h3>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="balance-card">
+          <span>Pending EMI</span>
+          <h3>{{ b.pendingEmiAmount | currency:'INR' }}</h3>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="balance-card">
+          <span>Overdue Amount</span>
+          <h3>{{ b.overdueAmount | currency:'INR' }}</h3>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="balance-card">
+          <span>Penalty Amount</span>
+          <h3>{{ b.penaltyAmount | currency:'INR' }}</h3>
+        </div>
+      </div>
+
+      <div class="col-12">
+        <div class="balance-card total-card">
+          <span>Total Outstanding</span>
+          <h2>{{ b.totalOutstanding | currency:'INR' }}</h2>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

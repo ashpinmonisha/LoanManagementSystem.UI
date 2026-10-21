@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '../../core/api-url';
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -21,7 +22,7 @@ export interface LoanDecisionResponse {
 export class LoanApprovalService {
   private readonly http = inject(HttpClient);
 
-  private readonly apiUrl = 'https://localhost:7085/api/Loan';
+  private readonly apiUrl = API_BASE_URL + '/Loan';
 
   getLoan(id: number): Observable<LoanApplication> {
     return this.http.get<LoanApplication>(`${this.apiUrl}/${id}`);

@@ -1,0 +1,18 @@
+.glass-panel {
+  animation: riseIn 0.7s ease both;
+}
+
+.glass-panel:hover {
+  border-color: rgba(170,150,255,0.5);
+}
+
+@keyframes riseIn {
+  from {
+    opacity: 0;
+    transform: translateY(25px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}

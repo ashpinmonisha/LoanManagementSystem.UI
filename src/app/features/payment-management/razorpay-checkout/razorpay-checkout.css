@@ -1,0 +1,123 @@
+/* 4.5 - Glossy Payment Confirmation */
+
+.confirmation-card {
+  max-width: 900px;
+  margin: 35px auto 0;
+  padding: 35px;
+  text-align: center;
+
+  border-radius: 25px;
+
+  background: linear-gradient(
+    135deg,
+    rgba(22, 91, 111, 0.55),
+    rgba(17, 31, 69, 0.9)
+  );
+
+  border: 1px solid rgba(100, 255, 210, 0.28);
+
+  box-shadow:
+    0 20px 50px rgba(0, 0, 0, 0.3),
+    0 0 35px rgba(33, 200, 156, 0.12),
+    inset 0 1px rgba(255,255,255,0.18);
+
+  backdrop-filter: blur(22px);
+
+  animation: confirmationAppear 0.65s ease;
+}
+
+.confirmation-icon {
+  display: grid;
+  place-items: center;
+
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 22px;
+
+  border-radius: 50%;
+
+  background: linear-gradient(
+    135deg,
+    #17b88b,
+    #3ed5c7
+  );
+
+  color: white;
+  font-size: 42px;
+  font-weight: 800;
+
+  box-shadow: 0 0 35px rgba(44, 225, 170, 0.4);
+}
+
+.confirmation-card h2 {
+  color: #d9fff4;
+  font-size: 28px;
+  font-weight: 800;
+}
+
+.confirmation-card > p {
+  color: #b9d7d2;
+  margin-bottom: 28px;
+}
+
+.confirmation-details {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  text-align: left;
+}
+
+.confirmation-details > div {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  padding: 18px;
+  border-radius: 14px;
+
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.confirmation-details span {
+  color: #b6c9d8;
+  font-size: 13px;
+}
+
+.confirmation-details strong {
+  color: white;
+  font-size: 15px;
+  overflow-wrap: anywhere;
+}
+
+.confirmation-details .completed {
+  color: #67f2c0;
+}
+
+@keyframes confirmationAppear {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(.97);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 600px) {
+  .confirmation-card {
+    padding: 22px;
+  }
+
+  .confirmation-details {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .confirmation-card {
+    animation: none;
+  }
+}

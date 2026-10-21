@@ -1,0 +1,72 @@
+<div class="payment-page">
+  <div class="glass-panel">
+
+    <div class="section-heading">
+      <span class="eyebrow">MODULE 4.2</span>
+      <h2>Payment History</h2>
+      <p>Track all recorded loan payments.</p>
+    </div>
+
+    <div class="row g-3 mb-4">
+      <div class="col-md-8">
+        <input
+          type="number"
+          class="form-control"
+          placeholder="Enter Loan ID"
+          [(ngModel)]="loanId">
+      </div>
+
+      <div class="col-md-4">
+        <button
+          class="glossy-btn w-100"
+          (click)="loadHistory()">
+          Search Payments
+        </button>
+      </div>
+    </div>
+
+    <div *ngIf="loading">Loading payments...</div>
+
+    <div *ngIf="error" class="alert alert-danger">
+      {{ error }}
+    </div>
+
+    <div class="table-responsive">
+      <table class="table payment-table">
+        <thead>
+          <tr>
+            <th>Payment ID</th>
+            <th>Date</th>
+            <th>Amount</th>
+            <th>Method</th>
+            <th>Reference</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let p of payments">
+            <td>#{{ p.paymentId }}</td>
+            <td>{{ p.paymentDate | date:'mediumDate' }}</td>
+            <td>{{ p.amount | currency:'INR' }}</td>
+            <td>{{ p.paymentMethod }}</td>
+            <td>{{ p.paymentReference }}</td>
+            <td>
+              <span class="status-pill"
+                    [class.completed]="p.paymentStatus === 'Completed'">
+                {{ p.paymentStatus }}
+              </span>
+            </td>
+          </tr>
+
+          <tr *ngIf="!loading && !error && payments.length === 0">
+            <td colspan="6" class="text-center py-4">
+              No payment records to display.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>

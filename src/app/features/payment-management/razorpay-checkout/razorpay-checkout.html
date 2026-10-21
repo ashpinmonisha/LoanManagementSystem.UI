@@ -1,0 +1,177 @@
+<div class="razorpay-page">
+
+  <div class="checkout-header">
+    <span>LOANSPHERE • PAYMENT MANAGEMENT</span>
+    <h1>Secure EMI Payment</h1>
+    <p>Pay and confirm your loan payment</p>
+  </div>
+
+  <div class="checkout-grid">
+
+    <!-- PAYMENT FORM -->
+    <div class="checkout-card">
+
+      <h2>Make Payment</h2>
+
+      <form #form="ngForm" (ngSubmit)="payNow()">
+
+        <label>Customer ID</label>
+        <input
+          type="number"
+          name="customerId"
+          [(ngModel)]="payment.customerId"
+          min="1"
+          required>
+
+        <label>Loan ID</label>
+        <input
+          type="number"
+          name="loanId"
+          [(ngModel)]="payment.loanId"
+          min="1"
+          required>
+
+        <label>EMI ID</label>
+        <input
+          type="number"
+          name="emiId"
+          [(ngModel)]="payment.emiId"
+          min="1"
+          required>
+
+        <label>Amount (₹)</label>
+        <input
+          type="number"
+          name="amount"
+          [(ngModel)]="payment.amount"
+          min="1"
+          step="0.01"
+          required>
+
+        <button
+          class="checkout-button"
+          type="submit"
+          [disabled]="loading || form.invalid">
+          {{ loading ? 'Processing...' : '₹ Pay Now' }}
+        </button>
+
+      </form>
+
+      <div *ngIf="error" class="error-message">
+        {{ error }}
+      </div>
+
+      <div *ngIf="message" class="success-message">
+        {{ message }}
+      </div>
+
+    </div>
+
+    <!-- PAYMENT SUMMARY -->
+    <div class="checkout-card summary-card">
+
+      <div class="rupee-icon">₹</div>
+
+      <h2>Payment Summary</h2>
+
+      <div class="summary-line">
+        <span>Customer</span>
+        <strong>{{ payment.customerId || '—' }}</strong>
+      </div>
+
+      <div class="summary-line">
+        <span>Loan</span>
+        <strong>{{ payment.loanId || '—' }}</strong>
+      </div>
+
+      <div class="summary-line">
+        <span>EMI</span>
+        <strong>{{ payment.emiId || '—' }}</strong>
+      </div>
+
+      <hr>
+
+      <p>Total Amount</p>
+
+      <h1>{{ payment.amount | currency:'INR' }}</h1>
+
+      <div class="test-mode">
+        RAZORPAY TEST MODE
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- VERIFIED PAYMENT CONFIRMATION -->
+  <div *ngIf="confirmation as receipt"
+       class="confirmation-card">
+
+    <div class="confirmation-icon">
+      ✓
+    </div>
+
+    <h2>Payment Confirmed</h2>
+
+    <p>
+      Your payment has been verified and recorded.
+    </p>
+
+    <div class="confirmation-details">
+
+      <div>
+        <span>Payment ID</span>
+        <strong>{{ receipt.paymentId }}</strong>
+      </div>
+
+      <div>
+        <span>Customer ID</span>
+        <strong>{{ receipt.customerId }}</strong>
+      </div>
+
+      <div>
+        <span>Loan ID</span>
+        <strong>{{ receipt.loanId }}</strong>
+      </div>
+
+      <div>
+        <span>EMI ID</span>
+        <strong>{{ receipt.emiId }}</strong>
+      </div>
+
+      <div>
+        <span>Amount</span>
+        <strong>
+          {{ receipt.amount | currency:'INR' }}
+        </strong>
+      </div>
+
+      <div>
+        <span>Payment Method</span>
+        <strong>{{ receipt.paymentMethod }}</strong>
+      </div>
+
+      <div>
+        <span>Transaction Reference</span>
+        <strong>{{ receipt.paymentReference }}</strong>
+      </div>
+
+      <div>
+        <span>Status</span>
+        <strong class="completed">
+          {{ receipt.paymentStatus }}
+        </strong>
+      </div>
+
+      <div>
+        <span>Payment Date</span>
+        <strong>
+          {{ receipt.paymentDate | date:'medium' }}
+        </strong>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

@@ -1,27 +1,21 @@
-
+import { API_BASE_URL } from '../../core/api-url';
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
-import {
-  RiskAssessmentRequest,
-  RiskAssessmentResponse
-} from '../../core/models/loan.model';
+import { RiskAssessmentRequest, RiskAssessmentResponse } from '../../core/models/loan.model';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class RiskAssessmentService {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = 'https://localhost:7085/api/risk-assessment';
+  private readonly apiUrl = API_BASE_URL + '/Loan';
 
-  assessRisk(
-  loanId: number,
-  request: RiskAssessmentRequest
-): Observable<RiskAssessmentResponse> {
-  return this.http.post<RiskAssessmentResponse>(
-    `${this.apiUrl}/${loanId}/risk-assessment`,
-    request
-  );
-}
+  assessRisk(loanId: number, request: RiskAssessmentRequest): Observable<RiskAssessmentResponse> {
+    return this.http.post<RiskAssessmentResponse>(
+      `${this.apiUrl}/${loanId}/risk-assessment`,
+      request,
+    );
+  }
 }

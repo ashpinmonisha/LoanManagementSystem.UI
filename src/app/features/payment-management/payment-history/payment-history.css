@@ -1,0 +1,32 @@
+.payment-table {
+  --bs-table-bg: transparent;
+  --bs-table-color: #eaf0ff;
+  --bs-table-border-color: rgba(255,255,255,0.12);
+}
+
+.payment-table th {
+  color: #aab9db;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.payment-table tbody tr {
+  transition: background 0.25s ease;
+}
+
+.payment-table tbody tr:hover {
+  --bs-table-bg: rgba(255,255,255,0.06);
+}
+
+.status-pill {
+  padding: 6px 12px;
+  border-radius: 30px;
+  color: #ffdc91;
+  background: rgba(255,180,50,0.15);
+}
+
+.status-pill.completed {
+  color: #86efac;
+  background: rgba(34,197,94,0.15);
+}

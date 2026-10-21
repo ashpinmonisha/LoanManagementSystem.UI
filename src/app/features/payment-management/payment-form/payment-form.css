@@ -1,0 +1,24 @@
+/* Record Payment - animated entrance */
+.glass-panel {
+  animation: panelEntrance 0.7s ease both;
+}
+
+.glossy-btn {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.glossy-btn:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 35px rgba(105, 90, 255, 0.4);
+}
+
+@keyframes panelEntrance {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

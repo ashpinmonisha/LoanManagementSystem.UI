@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '../../../core/api-url';
 import { Injectable, PLATFORM_ID, inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
@@ -14,7 +15,7 @@ export class LoginService {
   private readonly http = inject(HttpClient);
   private readonly platformId = inject(PLATFORM_ID);
 
-  private readonly apiUrl = 'https://localhost:7085/api/Employee';
+  private readonly apiUrl = API_BASE_URL + '/Employee';
   private readonly storageKey = 'employee';
 
   // sessionStorage does not exist on the server when SSR is on

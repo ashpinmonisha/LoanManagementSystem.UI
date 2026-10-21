@@ -1,0 +1,144 @@
+<div class="make-payment-page">
+
+  <div class="payment-heading">
+    <span>LOANSPHERE • PAYMENT MANAGEMENT</span>
+    <h1>Make Payment</h1>
+    <p>Record a customer loan or EMI payment.</p>
+  </div>
+
+  <div class="payment-layout">
+
+    <!-- PAYMENT FORM -->
+    <div class="payment-glass">
+
+      <h3>Payment Details</h3>
+
+      <form #form="ngForm" (ngSubmit)="payNow()">
+
+        <label>Customer ID</label>
+        <input
+          type="number"
+          name="customerId"
+          [(ngModel)]="payment.customerId"
+          min="1"
+          required
+          placeholder="Enter Customer ID">
+
+        <label>Loan ID</label>
+        <input
+          type="number"
+          name="loanId"
+          [(ngModel)]="payment.loanId"
+          min="1"
+          required
+          placeholder="Enter Loan ID">
+
+        <label>EMI ID</label>
+        <input
+          type="number"
+          name="emiId"
+          [(ngModel)]="payment.emiId"
+          min="1"
+          required
+          placeholder="Enter EMI ID">
+
+        <label>Amount (₹)</label>
+        <input
+          type="number"
+          name="amount"
+          [(ngModel)]="payment.amount"
+          min="0.01"
+          step="0.01"
+          required
+          placeholder="Enter Amount">
+
+        <label>Payment Method</label>
+        <select
+          name="paymentMethod"
+          [(ngModel)]="payment.paymentMethod">
+          <option value="UPI">UPI</option>
+          <option value="Cash">Cash</option>
+          <option value="Bank Transfer">Bank Transfer</option>
+          <option value="Card">Card</option>
+        </select>
+
+        <label>Transaction Reference</label>
+        <input
+          type="text"
+          name="paymentReference"
+          [(ngModel)]="payment.paymentReference"
+          required
+          placeholder="Enter real transaction reference">
+
+        <button
+          type="submit"
+          class="pay-button"
+          [disabled]="loading || form.invalid">
+          {{ loading ? 'Recording...' : 'Record Payment →' }}
+        </button>
+
+      </form>
+
+      <div *ngIf="error" class="payment-error">
+        {{ error }}
+      </div>
+
+      <div *ngIf="message" class="payment-success">
+        {{ message }}
+      </div>
+
+    </div>
+
+    <!-- PAYMENT SUMMARY -->
+    <div class="payment-glass summary">
+
+      <div class="summary-icon">₹</div>
+
+      <h3>Payment Summary</h3>
+
+      <div class="summary-row">
+        <span>Customer</span>
+        <strong>{{ payment.customerId || '—' }}</strong>
+      </div>
+
+      <div class="summary-row">
+        <span>Loan</span>
+        <strong>{{ payment.loanId || '—' }}</strong>
+      </div>
+
+      <div class="summary-row">
+        <span>EMI</span>
+        <strong>{{ payment.emiId || '—' }}</strong>
+      </div>
+
+      <div class="summary-row">
+        <span>Method</span>
+        <strong>{{ payment.paymentMethod }}</strong>
+      </div>
+
+      <hr>
+
+      <div class="total">
+        <span>Payment Amount</span>
+        <h2>{{ payment.amount | currency:'INR' }}</h2>
+      </div>
+
+      <div *ngIf="receipt" class="receipt">
+        <h4>Payment Recorded</h4>
+        <p>Payment ID: {{ receipt.paymentId }}</p>
+        <p>Status: {{ receipt.paymentStatus }}</p>
+        <p>Reference: {{ receipt.paymentReference }}</p>
+        <p>Amount: {{ receipt.amount | currency:'INR' }}</p>
+        <button type="button" class="pay-button" (click)="downloadReceipt()">Download receipt</button>
+        <p>Downloads a printable receipt. Open it and use Print to save as PDF.</p>
+      </div>
+
+      <p class="payment-note">
+        Recording a payment does not automatically confirm
+        that money was received.
+      </p>
+
+    </div>
+
+  </div>
+</div>

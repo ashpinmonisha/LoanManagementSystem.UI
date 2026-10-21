@@ -13,7 +13,7 @@ import { LoanApplicationRequest } from '../../../core/models/loan.model';
   standalone: true,
   imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './loan-application.html',
-  styleUrl: './Loan-Application.css'
+  styleUrl: './loan-application.css'
 })
 export class LoanApplicationComponent {
   private readonly service = inject(LoanApplicationService);

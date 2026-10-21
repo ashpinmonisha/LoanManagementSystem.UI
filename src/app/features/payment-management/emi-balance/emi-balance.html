@@ -1,0 +1,243 @@
+<div class="container-fluid emi-page py-4">
+
+  <div class="mb-4">
+    <span class="text-info fw-semibold">
+      LOANSPHERE / PAYMENT MANAGEMENT
+    </span>
+
+    <h2 class="fw-bold mt-2">
+      EMI Balance Management
+    </h2>
+
+    <p class="text-secondary">
+      Allocate verified payments and track outstanding EMIs.
+    </p>
+  </div>
+
+  <div class="row g-4">
+
+    <!-- ALLOCATION FORM -->
+    <div class="col-lg-5">
+
+      <div class="card emi-card p-4 h-100">
+
+        <h5 class="fw-bold mb-4">
+          Allocate Payment
+        </h5>
+
+        <form (ngSubmit)="allocatePayment()">
+
+          <label class="form-label">Payment ID</label>
+          <input
+            type="number"
+            class="form-control mb-3"
+            name="paymentId"
+            [(ngModel)]="paymentId"
+            min="1"
+            required>
+
+          <label class="form-label">EMI ID</label>
+          <input
+            type="number"
+            class="form-control mb-3"
+            name="emiId"
+            [(ngModel)]="emiId"
+            min="1"
+            required>
+
+          <button
+            type="submit"
+            class="btn btn-primary w-100"
+            [disabled]="allocating">
+
+            {{ allocating
+              ? 'Allocating...'
+              : 'Allocate Verified Payment' }}
+
+          </button>
+        </form>
+
+        <div
+          *ngIf="allocation"
+          class="alert alert-success mt-4">
+
+          <strong>
+            {{ allocation.allocationStatus }}
+          </strong>
+
+          <p class="mb-1 mt-2">
+            Amount:
+            {{ allocation.allocatedAmount | currency:'INR' }}
+          </p>
+
+          <p class="mb-1">
+            Remaining EMI:
+            {{ allocation.remainingEmiAmount | currency:'INR' }}
+          </p>
+
+          <p class="mb-0">
+            EMI Status: {{ allocation.emiStatus }}
+          </p>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- OUTSTANDING BALANCE -->
+    <div class="col-lg-7">
+
+      <div class="card emi-card p-4 h-100">
+
+        <h5 class="fw-bold mb-3">
+          Loan Outstanding Balance
+        </h5>
+
+        <label class="form-label">Loan ID</label>
+
+        <div class="input-group mb-4">
+          <input
+            type="number"
+            class="form-control"
+            name="loanId"
+            [(ngModel)]="loanId"
+            min="1">
+
+          <button
+            type="button"
+            class="btn btn-outline-info"
+            (click)="loadBalance()"
+            [disabled]="loading">
+
+            {{ loading ? 'Loading...' : 'Search' }}
+          </button>
+        </div>
+
+        <div *ngIf="outstanding as data">
+
+          <div class="row g-3">
+
+            <div class="col-sm-6">
+              <div class="stat-box">
+                <small>Total EMI Amount</small>
+                <h4>
+                  {{ data.totalEmiAmount | currency:'INR' }}
+                </h4>
+              </div>
+            </div>
+
+            <div class="col-sm-6">
+              <div class="stat-box">
+                <small>Total Paid</small>
+                <h4 class="text-success">
+                  {{ data.totalPaid | currency:'INR' }}
+                </h4>
+              </div>
+            </div>
+
+            <div class="col-sm-6">
+              <div class="stat-box">
+                <small>Outstanding</small>
+                <h4 class="text-warning">
+                  {{ data.totalOutstanding | currency:'INR' }}
+                </h4>
+              </div>
+            </div>
+
+            <div class="col-sm-6">
+              <div class="stat-box">
+                <small>Overdue</small>
+                <h4 class="text-danger">
+                  {{ data.overdueAmount | currency:'INR' }}
+                </h4>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <div *ngIf="error" class="alert alert-danger mt-3">
+    {{ error }}
+  </div>
+
+  <div *ngIf="success" class="alert alert-success mt-3">
+    {{ success }}
+  </div>
+
+  <!-- EMI DETAILS TABLE -->
+  <div
+    class="card emi-card p-4 mt-4"
+    *ngIf="outstanding as data">
+
+    <h5 class="fw-bold mb-4">EMI Schedule</h5>
+
+    <div class="table-responsive">
+
+      <table class="table table-dark table-hover align-middle">
+
+        <thead>
+          <tr>
+            <th>EMI ID</th>
+            <th>Due Date</th>
+            <th>EMI Amount</th>
+            <th>Paid</th>
+            <th>Remaining</th>
+            <th>Status</th>
+            <th>Progress</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let emi of data.emis">
+
+            <td>{{ emi.emiId }}</td>
+
+            <td>{{ emi.dueDate | date:'mediumDate' }}</td>
+
+            <td>{{ emi.emiAmount | currency:'INR' }}</td>
+
+            <td>{{ emi.amountPaid | currency:'INR' }}</td>
+
+            <td>
+              {{ emi.remainingAmount | currency:'INR' }}
+            </td>
+
+            <td>
+              <span
+                class="badge"
+                [ngClass]="{
+                  'bg-success': emi.status === 'Paid',
+                  'bg-warning text-dark':
+                    emi.status === 'PartiallyPaid',
+                  'bg-danger': emi.status === 'Overdue',
+                  'bg-secondary': emi.status === 'Pending'
+                }">
+
+                {{ emi.status }}
+
+              </span>
+            </td>
+
+            <td style="min-width: 100px">
+              <div class="progress">
+                <div
+                  class="progress-bar bg-success"
+                  [style.width.%]="percentage(emi)">
+                </div>
+              </div>
+            </td>
+
+          </tr>
+        </tbody>
+
+      </table>
+
+    </div>
+  </div>
+
+</div>
