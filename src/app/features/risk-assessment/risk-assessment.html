@@ -9,7 +9,7 @@
       <p>Evaluate financial capacity for loan #{{ loanId }}.</p>
     </div>
 
-    <form #riskForm="ngForm" (ngSubmit)="assess()">
+    <form (ngSubmit)="assess()" novalidate>
       <div class="field">
         <label for="monthlyIncome">Monthly income (₹)</label>
         <input
@@ -51,16 +51,16 @@
         />
       </div>
 
-      <p class="error" *ngIf="errorMessage">
-  {{ errorMessage }}
-</p>
+      <p class="error" *ngIf="errorMessage" role="alert">
+        {{ errorMessage }}
+      </p>
       <button
-  class="assess-button"
-  type="submit"
-  [disabled]="loading || !riskForm.valid || !validLoanId"
->
-  {{ loading ? 'Calculating...' : 'Calculate risk score →' }}
-</button>
+        class="assess-button"
+        type="submit"
+        [disabled]="loading || !validLoanId"
+      >
+        {{ loading ? 'Calculating...' : 'Calculate risk score →' }}
+      </button>
     </form>
   </section>
 

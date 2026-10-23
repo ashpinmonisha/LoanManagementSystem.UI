@@ -13,7 +13,7 @@ import {
 })
 export class RiskAssessmentService {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = 'https://localhost:7085/api/risk-assessment';
+  private readonly apiUrl = 'https://localhost:7085/api/Loan';
 
   assessRisk(
   loanId: number,
