@@ -35,5 +35,8 @@
     <button type="submit" class="submit" [disabled]="loading">
       {{ loading ? 'Signing in...' : 'Sign in' }}
     </button>
+    <p class="customer-link">
+      Customer? <a routerLink="/customer/login">Sign in to your account</a>
+    </p>
   </form>
 </div>

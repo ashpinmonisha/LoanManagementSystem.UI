@@ -1,12 +1,13 @@
 import { TestBed } from '@angular/core/testing';
-import { Razorpay } from './razorpay';
+import { provideHttpClient } from '@angular/common/http';
+import { RazorpayService } from './razorpay';
 
-describe('Razorpay', () => {
-  let service: Razorpay;
+describe('RazorpayService', () => {
+  let service: RazorpayService;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({});
-    service = TestBed.inject(Razorpay);
+    TestBed.configureTestingModule({ providers: [provideHttpClient()] });
+    service = TestBed.inject(RazorpayService);
   });
 
   it('should be created', () => {
