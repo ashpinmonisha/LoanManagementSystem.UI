@@ -1,0 +1,52 @@
+:host { background: #f4f6fa; color: #18283e; font-family: Inter, 'Segoe UI', sans-serif; }
+.topbar { background: #fff; border-color: #e2e8f0; box-shadow: none; padding: 16px 28px; }
+.brand { font-size: 22px; letter-spacing: -.7px; }
+.brand-icon, .avatar { background: #087f73; box-shadow: none; border-radius: 10px; width: 40px; height: 40px; font-size: 22px; }
+.avatar { background: #e2f3ee; color: #087568; border-radius: 50%; font-size: 15px; }
+.search-box { background: #f8fafc; border: 1px solid #dbe3ed; border-radius: 8px; box-shadow: none; max-width: 480px; padding: 11px 14px; }
+.search-box input { color: #18283e; }
+.search-box input::placeholder { color: #596b80; }
+.employee-name strong { font-size: 13px; }
+.employee-name small { color: #596b80; font-size: 11px; }
+.logout-button, .secondary-button { background: #fff; border: 1px solid #d5dee8; border-radius: 8px; color: #43556c; box-shadow: none; padding: 10px 14px; font-size: 12px; }
+.workspace { grid-template-columns: 224px minmax(0, 1fr); padding: 0; gap: 0; }
+.sidebar { min-height: calc(100vh - 80px); background: #14253b; border: 0; border-radius: 0; box-shadow: none; padding: 24px 12px; }
+.sidebar::after { display: none; }
+.sidebar nav { gap: 6px; padding: 0; position: sticky; top: 24px; }
+.sidebar nav a { min-height: 44px; border-radius: 8px; font-size: 13px; color: #bccbdd; padding: 12px 14px; }
+.sidebar nav a:hover { background: #213750; color: #fff; }
+.sidebar nav .active { background: #087f73; border-color: transparent; box-shadow: none; color: #fff; }
+.sidebar-footer { color: #e0e8f2; padding: 32px 14px 12px; }
+.sidebar-footer small { color: #a2b5cd; font-size: 11px; }
+.content { padding: 32px; gap: 24px; max-width: 1560px; width: 100%; margin: 0 auto; }
+.welcome { min-height: 140px; padding: 4px 0 12px; border: 0; border-radius: 0; background: none; box-shadow: none; }
+.eyebrow { color: #087568; letter-spacing: 1.8px; font-size: 10px; font-weight: 750; }
+h1 { font-size: clamp(25px, 2.5vw, 36px); letter-spacing: -1px; margin: 10px 0; }
+h2 { font-size: 19px; letter-spacing: -.4px; }
+p, .welcome p { color: #596b80; font-size: 13px; line-height: 1.65; }
+.primary-button, .review-button { background: #087f73; border: 1px solid #087f73; box-shadow: none; border-radius: 8px; font-size: 12px; padding: 11px 16px; }
+.primary-button:hover, .review-button:hover { background: #06665c; color: #fff; }
+.welcome-actions { display: flex; gap: 10px; flex-shrink: 0; flex-wrap: wrap; }
+.stats { gap: 16px; }
+.stat-card { min-height: 150px; padding: 22px; background: #fff; border: 1px solid #e2e8f0; border-top: 3px solid #64748b; border-radius: 12px; box-shadow: none; }
+.stat-card.pending { border-top-color: #c48b20; }
+.stat-card.approved { border-top-color: #0d9488; }
+.stat-card.rejected { border-top-color: #dc6677; }
+.stat-card div > span { color: #506278; font-size: 12px; margin: 0 0 14px; }
+.stat-card strong { font-size: 32px; letter-spacing: -1px; font-variant-numeric: tabular-nums; }
+.stat-card small { color: #596b80; }
+.applications-panel { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 3px 12px #18283e03; padding: 26px; }
+.table-scroll { background: #fff; border-color: #e2e8f0; border-radius: 8px; }
+table { font-size: 12px; }
+th { background: #f7f9fc; color: #53657b; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; }
+th, td { padding: 16px; border-bottom: 1px solid #edf1f5; }
+td { color: #43556c; font-variant-numeric: tabular-nums; }
+td:first-child { color: #087568; font-weight: 650; }
+tbody tr:hover { background: #f8fbfc; }
+.review-button { background: #edf8f5; border-color: #cae7de; color: #087568; font-size: 11px; padding: 8px 12px; }
+.status { background: #edf2f7; color: #52647c; border-radius: 6px; font-size: 11px; padding: 5px 9px; }
+.status.pending { color: #8c620c; background: #fff6dd; }
+.status.approved { color: #087568; background: #e6f6ef; }
+.status.rejected { color: #b43852; background: #fff0f3; }
+.empty, .loading { color: #596b80; }
+.error { color: #a52a43; background: #fff2f4; border: 1px solid #f5ccd4; border-radius: 8px; line-height: 1.6; }

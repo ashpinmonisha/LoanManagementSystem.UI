@@ -1,0 +1,162 @@
+.reconciliation-page {
+  background: #f5f7fb;
+  min-height: 100vh;
+  padding-left: 24px;
+  padding-right: 24px;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.page-header h2 {
+  color: #172b4d;
+  font-size: 27px;
+}
+
+.card {
+  border-radius: 15px;
+  overflow: hidden;
+}
+
+.card-body {
+  padding: 22px;
+}
+
+.summary-card {
+  background: white;
+  border-radius: 15px;
+  padding: 22px;
+  min-height: 145px;
+  box-shadow: 0 3px 14px rgba(22, 34, 51, 0.06);
+}
+
+.summary-label,
+.metric-label,
+.detail-label {
+  color: #667085;
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+
+.summary-value {
+  font-size: 31px;
+  font-weight: 750;
+  color: #172b4d;
+}
+
+.summary-description {
+  color: #98a2b3;
+  font-size: 12px;
+  margin-top: 6px;
+}
+
+.metric-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: #344054;
+}
+
+.nav-pills .nav-link {
+  color: #475467;
+  font-weight: 600;
+  border-radius: 9px;
+  padding: 11px 17px;
+}
+
+.nav-pills .nav-link.active {
+  background: #3458e8;
+  color: white;
+}
+
+.form-control {
+  border-radius: 9px;
+  min-height: 44px;
+  border-color: #d0d5dd;
+}
+
+.form-control:focus {
+  border-color: #3458e8;
+  box-shadow: 0 0 0 3px rgba(52, 88, 232, 0.1);
+}
+
+.btn {
+  border-radius: 9px;
+  padding: 10px 17px;
+  font-weight: 600;
+}
+
+.btn-primary {
+  background: #3458e8;
+  border-color: #3458e8;
+}
+
+.btn-primary:hover {
+  background: #2845c3;
+}
+
+.result-panel {
+  background: #f8faff;
+  border: 1px solid #e2e8ff;
+  border-radius: 12px;
+  padding: 22px;
+}
+
+.table {
+  margin-bottom: 0;
+}
+
+.table thead th {
+  background: #f2f5fa;
+  color: #475467;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 15px;
+  white-space: nowrap;
+}
+
+.table tbody td {
+  padding: 15px;
+  font-size: 13px;
+  vertical-align: middle;
+}
+
+.badge {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 8px 11px;
+  border-radius: 7px;
+}
+
+.empty-state {
+  text-align: center;
+  color: #98a2b3;
+  padding: 35px !important;
+}
+
+@media (max-width: 768px) {
+  .reconciliation-page {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .page-header h2 {
+    font-size: 22px;
+  }
+
+  .summary-card {
+    padding: 16px;
+  }
+
+  .summary-value {
+    font-size: 26px;
+  }
+
+  .card-body {
+    padding: 16px;
+  }
+}

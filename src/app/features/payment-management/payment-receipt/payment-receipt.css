@@ -1,0 +1,40 @@
+.receipt-page {
+  max-width: 1100px;
+}
+
+.card {
+  border: none;
+  border-radius: 14px;
+}
+
+.receipt-card {
+  border-top: 5px solid #198754;
+}
+
+.amount-box {
+  background: #eaf7ef;
+  color: #17613b;
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.amount-box h2 {
+  font-weight: 700;
+}
+
+.form-control {
+  border-radius: 8px;
+}
+
+.btn {
+  border-radius: 8px;
+}
+
+.table thead {
+  background: #f5f7fa;
+}
+
+.table td,
+.table th {
+  padding: 12px;
+}

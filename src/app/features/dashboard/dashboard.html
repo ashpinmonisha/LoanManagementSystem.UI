@@ -1,5 +1,6 @@
 @if (isEmployee) {
   <div class="dashboard">
+    <a class="skip-link" href="#employee-content">Skip to dashboard content</a>
     <header class="topbar">
       <a class="brand" routerLink="/dashboard"><span class="brand-icon">&#8377;</span>LoanSphere</a>
       <label class="search-box"
@@ -20,31 +21,66 @@
     <div class="workspace">
       <aside class="sidebar">
         <nav aria-label="Employee navigation">
-          <a class="active" routerLink="/dashboard" aria-current="page">Dashboard</a>
-          <a routerLink="/dashboard" fragment="growth">Growth overview</a>
-          <a routerLink="/dashboard" fragment="applications">Approve / Reject</a>
-          <a routerLink="/dashboard" fragment="payment-summary">Payment summary</a>
-          <a routerLink="/dashboard" fragment="notifications"
+          <a [class.active]="selectedPage === 'overview'" routerLink="/dashboard" [attr.aria-current]="selectedPage === 'overview' ? 'page' : null">Overview</a>
+          <a [class.active]="selectedPage === 'growth'" [attr.aria-current]="selectedPage === 'growth' ? 'page' : null" routerLink="/dashboard" fragment="growth">Growth overview</a>
+          <a [class.active]="selectedPage === 'applications'" [attr.aria-current]="selectedPage === 'applications' ? 'page' : null" routerLink="/dashboard" fragment="applications">Review applications</a>
+          <a routerLink="/dashboard/payments" [class.active]="selectedPage === 'payments'" [attr.aria-current]="selectedPage === 'payments' ? 'page' : null">Payments</a>
+          <a [class.active]="selectedPage === 'payment-summary'" [attr.aria-current]="selectedPage === 'payment-summary' ? 'page' : null" routerLink="/dashboard" fragment="payment-summary">Payment summary</a>
+          <a [class.active]="selectedPage === 'notifications'" [attr.aria-current]="selectedPage === 'notifications' ? 'page' : null" routerLink="/dashboard" fragment="notifications"
             >Notifications ({{ notifications.length }})</a
           >
         </nav>
         <div class="sidebar-footer">LoanSphere<small>Employee Portal</small></div>
       </aside>
-      <main class="content">
+      <main class="content" id="employee-content" tabindex="-1">
         <section class="welcome">
           <div class="welcome-copy">
             <span class="eyebrow">EMPLOYEE WORKSPACE</span>
-            <h1>Welcome, {{ employee?.employeeName || 'Employee' }}!</h1>
-            <p>Track money coming in, loan commitments and collection growth in one dashboard.</p>
+            <h1>{{ pageTitle }}</h1>
+            @if (selectedPage === 'overview') {
+            <p>Your applications, collections and next decisions, all in one place.</p>
+            }
           </div>
+          <div class="welcome-actions">
+          <a class="primary-button" routerLink="/dashboard" fragment="applications">Review applications &rarr;</a>
           <button
-            class="primary-button"
+            class="secondary-button"
             (click)="loadApplications()"
             [disabled]="loading || paymentsLoading"
           >
-            Refresh dashboard
+            {{ loading || paymentsLoading ? 'Refreshing...' : 'Refresh data' }}
           </button>
+          </div>
         </section>
+        @if (selectedPage === 'overview') {
+        <section class="stats" aria-label="Application statistics">
+          <article class="stat-card pending">
+            <div>
+              <span>Awaiting decision</span><strong>{{ pendingCount }}</strong
+              ><small>Applications to approve or reject</small>
+            </div>
+          </article>
+          <article class="stat-card approved">
+            <div>
+              <span>Approved</span><strong>{{ approvedCount }}</strong
+              ><small>Approved applications</small>
+            </div>
+          </article>
+          <article class="stat-card rejected">
+            <div>
+              <span>Rejected</span><strong>{{ rejectedCount }}</strong
+              ><small>Rejected applications</small>
+            </div>
+          </article>
+          <article class="stat-card total">
+            <div>
+              <span>Notifications</span><strong>{{ notifications.length }}</strong
+              ><small>Items needing attention</small>
+            </div>
+          </article>
+        </section>
+        }
+        @if (selectedPage === 'growth') {
         <section id="growth" class="applications-panel growth-panel" aria-label="Growth dashboard">
           <div class="panel-header">
             <div>
@@ -176,32 +212,8 @@
             </p>
           }
         </section>
-        <section class="stats" aria-label="Application statistics">
-          <article class="stat-card pending">
-            <div>
-              <span>Awaiting decision</span><strong>{{ pendingCount }}</strong
-              ><small>Applications to approve or reject</small>
-            </div>
-          </article>
-          <article class="stat-card approved">
-            <div>
-              <span>Approved</span><strong>{{ approvedCount }}</strong
-              ><small>Approved applications</small>
-            </div>
-          </article>
-          <article class="stat-card rejected">
-            <div>
-              <span>Rejected</span><strong>{{ rejectedCount }}</strong
-              ><small>Rejected applications</small>
-            </div>
-          </article>
-          <article class="stat-card total">
-            <div>
-              <span>Notifications</span><strong>{{ notifications.length }}</strong
-              ><small>Items needing attention</small>
-            </div>
-          </article>
-        </section>
+        }
+        @if (selectedPage === 'payment-summary') {
         <section id="payment-summary" class="applications-panel">
           <div class="panel-header">
             <div>
@@ -241,6 +253,8 @@
             }
           }
         </section>
+        }
+        @if (selectedPage === 'notifications') {
         <section id="notifications" class="applications-panel" aria-label="Employee notifications">
           <div class="panel-header">
             <div>
@@ -248,11 +262,14 @@
               <p>Current application and payment alerts. Updated when you refresh.</p>
             </div>
           </div>
-          @if (loading || paymentsLoading) {
+          @if (loading) {
             <p role="status">Loading notifications...</p>
           } @else if (errorMessage) {
             <p>Notifications unavailable. Refresh to try again.</p>
           } @else {
+            @if (paymentsLoading) {
+              <p role="status">Loading payment alerts...</p>
+            }
             <ul class="notification-list">
               @for (notification of notifications; track notification.message) {
                 <li>
@@ -266,11 +283,15 @@
                   >
                 </li>
               } @empty {
+                @if (!paymentsLoading) {
                 <li>No items need attention.</li>
+                }
               }
             </ul>
           }
         </section>
+        }
+        @if (selectedPage === 'applications') {
         <section id="applications" class="applications-panel">
           <div class="panel-header">
             <div>
@@ -352,6 +373,12 @@
             </table>
           </div>
         </section>
+        }
+        @if (selectedPage === 'payments') {
+          <section class="applications-panel" aria-label="Payment management">
+            <router-outlet />
+          </section>
+        }
       </main>
     </div>
   </div>

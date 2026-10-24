@@ -18,7 +18,14 @@ export const routes: Routes = [
   {
     path: 'dashboard',
     component: DashboardComponent,
-    canActivate: [authGuard]
+    canActivate: [authGuard],
+    children: [
+      { path: 'payments', pathMatch: 'full', redirectTo: 'payments/record' },
+      {
+        path: 'payments/record',
+        loadComponent: () => import('./features/dashboard/employee-payment-records').then(m => m.EmployeePaymentRecords)
+      }
+    ]
   },
   {
     path: 'loan-application',

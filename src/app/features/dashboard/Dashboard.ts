@@ -1,8 +1,8 @@
 import { ChangeDetectorRef, Component, DestroyRef, inject, OnInit } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { catchError, forkJoin, map, of, Subscription } from 'rxjs';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { catchError, forkJoin, map, of, Subscription, filter } from 'rxjs';
 import { CommonModule } from '@angular/common';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
 import { LoanApplication } from '../../core/models/loan.model';
 import { LoginService } from '../login/login/login.service';
 import { LoanApplicationService } from '../loan-application/loan-application/loan-application.service';
@@ -11,7 +11,7 @@ import { OutstandingBalance, PaymentHistory, PaymentService } from '../../core/s
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, RouterOutlet],
   templateUrl: './dashboard.html',
   styleUrls: [
     './Dashboard.css',
@@ -19,9 +19,35 @@ import { OutstandingBalance, PaymentHistory, PaymentService } from '../../core/s
     './dashboard-responsive.css',
     './dashboard-employee.css',
     './dashboard-growth.css',
+    './dashboard-workspace.css',
+    './dashboard-workspace-panels.css',
   ],
 })
 export class DashboardComponent implements OnInit {
+  private readonly navigation = toSignal(inject(Router).events.pipe(filter(event => event instanceof NavigationEnd)));
+  private readonly fragment = toSignal(inject(ActivatedRoute).fragment);
+
+  get selectedPage(): string {
+    this.navigation();
+    if (this.router.url.split(/[?#]/)[0].startsWith('/dashboard/payments')) return 'payments';
+    const fragment = this.fragment();
+    if (fragment?.startsWith('loan-')) return 'applications';
+    return ['growth', 'applications', 'payment-summary', 'notifications'].includes(fragment ?? '')
+      ? fragment!
+      : 'overview';
+  }
+
+  get pageTitle(): string {
+    switch (this.selectedPage) {
+      case 'payments': return 'Payments';
+      case 'growth': return 'Growth overview';
+      case 'applications': return 'Review applications';
+      case 'payment-summary': return 'Payment summary';
+      case 'notifications': return 'Notifications';
+      default: return 'Welcome, ' + (this.employee?.employeeName || 'Employee') + '!';
+    }
+  }
+
   private readonly loans = inject(LoanApplicationService);
   private readonly loginService = inject(LoginService);
   private readonly router = inject(Router);
