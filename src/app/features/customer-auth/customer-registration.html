@@ -1,0 +1,113 @@
+<main class="auth-page">
+  <section class="auth-card registration-card">
+    <a class="back-link" routerLink="/customer/login">← Customer sign in</a>
+    <span class="eyebrow">CUSTOMER REGISTRATION</span>
+    <h1>Create your account</h1>
+    <p class="intro">Register to manage your loan journey securely.</p>
+
+    @if (errorMessage) {
+      <p class="message error" role="alert">{{ errorMessage }}</p>
+    }
+    @if (successMessage) {
+      <p class="message success" role="status">{{ successMessage }}</p>
+    }
+
+    <form #registrationForm="ngForm" (ngSubmit)="submit()">
+      <div class="form-grid">
+        <div class="field">
+          <label for="fullName">Full name</label>
+          <input
+            id="fullName"
+            name="fullName"
+            [(ngModel)]="fullName"
+            minlength="3"
+            maxlength="100"
+            required
+            autocomplete="name"
+          />
+        </div>
+        <div class="field">
+          <label for="email">Email address</label>
+          <input
+            id="email"
+            name="email"
+            type="email"
+            [(ngModel)]="email"
+            maxlength="150"
+            required
+            autocomplete="email"
+          />
+        </div>
+        <div class="field">
+          <label for="phoneNumber">Phone number</label>
+          <input
+            id="phoneNumber"
+            name="phoneNumber"
+            type="tel"
+            [(ngModel)]="phoneNumber"
+            minlength="7"
+            maxlength="20"
+            required
+            autocomplete="tel"
+          />
+        </div>
+        <div class="field">
+          <label for="dateOfBirth">Date of birth</label>
+          <input
+            id="dateOfBirth"
+            name="dateOfBirth"
+            type="date"
+            [(ngModel)]="dateOfBirth"
+            [max]="today"
+          />
+        </div>
+        <div class="field">
+          <label for="gender">Gender <span class="optional">(optional)</span></label>
+          <select id="gender" name="gender" [(ngModel)]="gender">
+            <option value="">Prefer not to say</option>
+            <option value="Female">Female</option>
+            <option value="Male">Male</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="password">Password</label>
+          <input
+            id="password"
+            name="password"
+            type="password"
+            [(ngModel)]="password"
+            minlength="8"
+            required
+            autocomplete="new-password"
+          />
+        </div>
+        <div class="field full">
+          <label for="confirmPassword">Confirm password</label>
+          <input
+            id="confirmPassword"
+            name="confirmPassword"
+            type="password"
+            [(ngModel)]="confirmPassword"
+            minlength="8"
+            required
+            autocomplete="new-password"
+          />
+          @if (confirmPassword && !passwordsMatch) {
+            <span class="field-error">Passwords do not match.</span>
+          }
+        </div>
+      </div>
+
+      <button
+        class="primary-button"
+        type="submit"
+        [disabled]="loading || !registrationForm.valid || !passwordsMatch"
+      >
+        {{ loading ? 'Creating account…' : 'Create customer account' }}
+      </button>
+    </form>
+
+    <p class="switch-auth">Already registered? <a routerLink="/customer/login">Sign in</a></p>
+  </section>
+</main>
