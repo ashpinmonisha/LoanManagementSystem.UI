@@ -2,15 +2,12 @@ import { Routes } from '@angular/router';
 
 import { authGuard } from './core/guards/auth.guard';
 import { LoginComponent } from './features/login/login/login';
-<<<<<<< HEAD
 
 import { LoanApplicationComponent } from './features/loan-application/loan-application/loan-application';
 import { LoanApprovalComponent } from './features/loan-approval/loan-approval';
 import { RiskAssessmentComponent } from './features/risk-assessment/risk-assessment';
 import { DashboardComponent } from './features/dashboard/Dashboard';
-=======
 import { EMI_ROUTES } from './emi.routes';
->>>>>>> origin/jousha
 
 export const routes: Routes = [
   {
@@ -48,37 +45,37 @@ export const routes: Routes = [
     path: 'payments/record',
     loadComponent: () =>
       import('./features/payment-management/payment-form/payment-form')
-      .then(m => m.PaymentForm)
+        .then(m => m.PaymentForm)
   },
 
-// 4.2 Payment History
+  // 4.2 Payment History
   {
     path: 'payments/history',
     loadComponent: () =>
-    import('./features/payment-management/payment-history/payment-history')
-      .then(m => m.PaymentHistory)
+      import('./features/payment-management/payment-history/payment-history')
+        .then(m => m.PaymentHistory)
   },
 
-// 4.3 Outstanding Balance
+  // 4.3 Outstanding Balance
   {
     path: 'payments/outstanding',
     loadComponent: () =>
-    import('./features/payment-management/outstanding/outstanding')
-      .then(m => m.Outstanding)
+      import('./features/payment-management/outstanding/outstanding')
+        .then(m => m.Outstanding)
   },
 
-// 4.4 Advanced Payment
+  // 4.4 Advanced Payment
   {
     path: 'payments/advanced',
     loadComponent: () =>
-    import('./features/payment-management/advanced-payment/advanced-payment')
-      .then(m => m.AdvancedPayment)
+      import('./features/payment-management/advanced-payment/advanced-payment')
+        .then(m => m.AdvancedPayment)
   },
   {
     path: 'payments/make',
     loadComponent: () =>
-    import('./features/payment-management/make-payment/make-payment')
-      .then(m => m.MakePayment)
+      import('./features/payment-management/make-payment/make-payment')
+        .then(m => m.MakePayment)
   },
   {
     path: '**',
