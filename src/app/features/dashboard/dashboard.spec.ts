@@ -42,12 +42,14 @@ const balance: OutstandingBalance = {
 
 describe('Employee dashboard', () => {
   let employee: boolean;
+  let role: string;
   let fragment: BehaviorSubject<string | null>;
   const loans = { getApplications: vi.fn() };
   const payments = { getHistory: vi.fn(), getOutstanding: vi.fn() };
 
   beforeEach(() => {
     employee = true;
+    role = 'Employee';
     fragment = new BehaviorSubject<string | null>(null);
     loans.getApplications.mockReturnValue(
       of([loan(1, 'Approved'), loan(2, 'Pending'), loan(3, 'Rejected')]),
@@ -67,9 +69,11 @@ describe('Employee dashboard', () => {
           provide: LoginService,
           useValue: {
             isEmployee: () => employee,
+            isAllowedRole: (candidate: string | undefined) =>
+              ['admin', 'manager', 'employee'].includes(candidate?.trim().toLowerCase() ?? ''),
             getEmployee: () => ({
               employeeName: 'Employee',
-              role: employee ? 'Employee' : 'Customer',
+              role,
             }),
           },
         },
@@ -99,6 +103,30 @@ describe('Employee dashboard', () => {
     fragment.next('notifications');
     await fixture.whenStable();
     expect(fixture.nativeElement.textContent).toContain('overdue payment');
+  });
+
+  it('calculates overview metrics from loaded applications and successful payments', async () => {
+    loans.getApplications.mockReturnValue(
+      of([loan(1, 'Active'), loan(2, 'Pending'), loan(3, 'Rejected'), loan(4, 'Approved')]),
+    );
+    const todayPayments = [
+      { ...payment(250, 'Completed'), customerId: 7, paymentDate: new Date().toISOString() },
+      { ...payment(800, 'Failed'), customerId: 7, paymentDate: new Date().toISOString() },
+    ];
+    payments.getHistory.mockImplementation((loanId: number) => of(loanId === 1 ? todayPayments : []));
+    const fixture = TestBed.createComponent(DashboardComponent);
+    await fixture.whenStable();
+    const component = fixture.componentInstance;
+
+    expect(component.activeLoanCount).toBe(2);
+    expect(component.customerCount).toBe(4);
+    expect(component.todayCollections).toBe(250);
+    expect(component.todayPaymentCount).toBe(1);
+    expect(component.overdueLoanCount).toBe(2);
+    expect(component.overdueAmount).toBe(1000);
+    expect(component.approvalQueue.map((application) => application.loanApplicationId)).toEqual([2]);
+    expect(fixture.nativeElement.querySelector('.employee-overview')).not.toBeNull();
+    expect(fixture.nativeElement.textContent).toContain('Monthly collections');
   });
 
   it('shows pending application notifications while payment requests are still loading', async () => {
@@ -179,6 +207,16 @@ describe('Employee dashboard', () => {
     expect(fixture.nativeElement.querySelector('.applications-panel')).toBeNull();
   });
 
+  it('renders and loads the dashboard for an authorized manager role', async () => {
+    role = 'Manager';
+    const fixture = TestBed.createComponent(DashboardComponent);
+    await fixture.whenStable();
+
+    expect(fixture.nativeElement.querySelector('.dashboard')).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('.employee-name small').textContent).toContain('Manager');
+    expect(loans.getApplications).toHaveBeenCalledOnce();
+  });
+
   it('handles an empty portfolio without invalid ratios or chart values', async () => {
     loans.getApplications.mockReturnValue(of([]));
     const fixture = TestBed.createComponent(DashboardComponent);
@@ -193,6 +231,7 @@ describe('Employee dashboard', () => {
 
   it('does not show employee content or fetch loan data for a different role', async () => {
     employee = false;
+    role = 'Customer';
     const fixture = TestBed.createComponent(DashboardComponent);
     await fixture.whenStable();
     expect(fixture.nativeElement.querySelector('.dashboard')).toBeNull();

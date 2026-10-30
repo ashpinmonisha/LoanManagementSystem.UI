@@ -2,6 +2,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { catchError, forkJoin, of } from 'rxjs';
 import {
   CustomerEligibilityProfile,
   CustomerEligibilityResult,
@@ -10,24 +11,36 @@ import {
 } from '../../core/models/customer.model';
 import { CustomerAuthService } from '../../core/services/customer-auth';
 import { CustomerManagementService } from '../../core/services/customer-management';
+import { EmiAllocationService, EmiDetails, EmiOutstanding } from '../../core/services/emi-allocation';
+import { PaymentHistory, PaymentService } from '../../core/services/payment';
+import { CustomerPaymentsComponent } from './customer-payments';
 
-type PortalSection = 'profile' | 'kyc' | 'eligibility';
+type PortalSection = 'dashboard' | 'loans' | 'schedule' | 'payments' | 'profile' | 'kyc' | 'eligibility';
 
 @Component({
   selector: 'app-customer-portal',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, CustomerPaymentsComponent],
   templateUrl: './customer-portal.html',
   styleUrl: './customer-portal.css',
 })
 export class CustomerPortalComponent implements OnInit {
   private readonly auth = inject(CustomerAuthService);
   private readonly service = inject(CustomerManagementService);
+  private readonly emiService = inject(EmiAllocationService);
+  private readonly paymentService = inject(PaymentService);
   private readonly cdr = inject(ChangeDetectorRef);
 
   readonly customer = this.auth.getCustomer();
   readonly today = new Date().toISOString().slice(0, 10);
-  section: PortalSection = 'profile';
+  section: PortalSection = 'dashboard';
+  dashboardLoanId: number | null = null;
+  dashboardOutstanding: EmiOutstanding | null = null;
+  dashboardHistory: PaymentHistory[] = [];
+  dashboardLoading = false;
+  dashboardError = '';
+  dashboardHistoryError = '';
+  private dashboardRequestId = 0;
 
   profile: CustomerProfile | null = null;
   profileLoading = true;
@@ -64,10 +77,101 @@ export class CustomerPortalComponent implements OnInit {
     return date.toISOString().slice(0, 10);
   }
 
+  get nextEmi(): EmiDetails | null {
+    return (this.dashboardOutstanding?.emis ?? [])
+      .filter(emi => emi.remainingAmount > 0 && !['paid', 'completed'].includes(emi.status.toLowerCase()))
+      .slice()
+      .sort((a, b) => Date.parse(a.dueDate) - Date.parse(b.dueDate))[0] ?? null;
+  }
+
+  get dashboardEmis(): EmiDetails[] {
+    return (this.dashboardOutstanding?.emis ?? [])
+      .slice()
+      .sort((a, b) => Date.parse(a.dueDate) - Date.parse(b.dueDate));
+  }
+
+  get recentPayments(): PaymentHistory[] {
+    return this.dashboardHistory
+      .slice()
+      .sort((a, b) => Date.parse(b.paymentDate) - Date.parse(a.paymentDate))
+      .slice(0, 4);
+  }
+
+  get repaymentPercent(): number {
+    const total = this.dashboardOutstanding?.totalEmiAmount ?? 0;
+    if (total <= 0) return 0;
+    return Math.min(100, Math.max(0, ((this.dashboardOutstanding?.totalPaid ?? 0) / total) * 100));
+  }
+
+  get remainingPercent(): number {
+    return this.dashboardOutstanding?.totalEmiAmount
+      ? Math.min(100, Math.max(0, 100 - this.repaymentPercent))
+      : 0;
+  }
+
+  get dashboardPaymentStatus(): string {
+    if (!this.dashboardOutstanding) return 'Add a loan to get started';
+    if (this.dashboardOutstanding.overdueAmount > 0) return 'Payment overdue';
+    return this.nextEmi ? 'Payment due soon' : 'Up to date';
+  }
+
   ngOnInit(): void {
     this.loadProfile();
     this.loadDocuments();
     this.loadEligibility();
+  }
+
+  loadDashboardLoan(): void {
+    this.dashboardError = '';
+    this.dashboardHistoryError = '';
+    this.dashboardOutstanding = null;
+    this.dashboardHistory = [];
+
+    if (!Number.isInteger(this.dashboardLoanId) || !this.dashboardLoanId || this.dashboardLoanId < 1) {
+      this.dashboardError = 'Enter a valid loan ID to load its payment dashboard.';
+      return;
+    }
+
+    const loanId = this.dashboardLoanId;
+    const requestId = ++this.dashboardRequestId;
+    this.dashboardLoading = true;
+
+    forkJoin({
+      outstanding: this.emiService.getOutstanding(loanId, true).pipe(
+        catchError((error: HttpErrorResponse) => {
+          if (requestId === this.dashboardRequestId) {
+            this.dashboardError = this.errorMessage(
+              error,
+              'Unable to load EMIs for this loan.',
+              'This loan could not be found for your customer account.',
+            );
+          }
+          return of(null);
+        }),
+      ),
+      history: this.paymentService.getHistory(loanId, true).pipe(
+        catchError((error: HttpErrorResponse) => {
+          if (requestId === this.dashboardRequestId) {
+            this.dashboardHistoryError = this.errorMessage(
+              error,
+              'Unable to load payment history.',
+              'Payment history is unavailable for this loan.',
+            );
+          }
+          return of(null);
+        }),
+      ),
+    }).subscribe(({ outstanding, history }) => {
+      if (requestId !== this.dashboardRequestId) return;
+      this.dashboardOutstanding = outstanding;
+      this.dashboardHistory = history ?? [];
+      this.dashboardLoading = false;
+      this.cdr.markForCheck();
+    });
+  }
+
+  openPayments(): void {
+    this.section = 'payments';
   }
 
   loadProfile(): void {
@@ -294,10 +398,15 @@ export class CustomerPortalComponent implements OnInit {
     };
   }
 
-  private errorMessage(error: HttpErrorResponse, fallback: string): string {
+  private errorMessage(
+    error: HttpErrorResponse,
+    fallback: string,
+    notFound = 'The requested customer information could not be found.',
+  ): string {
     if (error.status === 0)
-      return 'Cannot connect to the API. Check the backend and HTTPS certificate.';
+      return 'Cannot connect to the backend. Check that the API is running and /api is proxied to it.';
     if (error.status === 401) return 'Your session has expired. Sign in again to continue.';
+    if (error.status === 403 || error.status === 404) return notFound;
     return error.error?.message ?? error.error?.title ?? fallback;
   }
 }

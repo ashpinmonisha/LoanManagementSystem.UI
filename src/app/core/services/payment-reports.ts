@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { API_BASE_URL } from '../api-url';
 
 export interface PaymentDashboard {
   totalPayments: number;
@@ -57,8 +58,7 @@ export class PaymentReportsService {
 
   private http = inject(HttpClient);
 
-  private readonly apiUrl =
-    'https://localhost:7085/api/PaymentReports';
+  private readonly apiUrl = `${API_BASE_URL}/PaymentReports`;
 
   private params(filter: ReportFilter): HttpParams {
     let params = new HttpParams();

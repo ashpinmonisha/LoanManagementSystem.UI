@@ -1,7 +1,8 @@
 import { API_BASE_URL } from '../api-url';
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpContext } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { CUSTOMER_PORTAL_REQUEST } from '../customer-portal-request';
 
 export interface RecordPayment {
   customerId: number;
@@ -52,16 +53,18 @@ export class PaymentService {
   }
 
   // 4.2 Payment History
-  getHistory(loanId: number): Observable<PaymentHistory[]> {
+  getHistory(loanId: number, customerPortal = false): Observable<PaymentHistory[]> {
     return this.http.get<PaymentHistory[]>(
-      `${this.apiUrl}/Payments/history/${loanId}`
+      `${this.apiUrl}/Payments/history/${loanId}`,
+      customerPortal ? { context: new HttpContext().set(CUSTOMER_PORTAL_REQUEST, true) } : {},
     );
   }
 
   // 4.3 Outstanding Balance
-  getOutstanding(loanId: number): Observable<OutstandingBalance> {
+  getOutstanding(loanId: number, customerPortal = false): Observable<OutstandingBalance> {
     return this.http.get<OutstandingBalance>(
-      `${this.apiUrl}/Payments/outstanding/${loanId}`
+      `${this.apiUrl}/Payments/outstanding/${loanId}`,
+      customerPortal ? { context: new HttpContext().set(CUSTOMER_PORTAL_REQUEST, true) } : {},
     );
   }
 

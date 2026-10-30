@@ -1,6 +1,10 @@
 import {
   Component,
+  EventEmitter,
   inject,
+  Input,
+  OnChanges,
+  Output,
   PLATFORM_ID
 } from '@angular/core';
 
@@ -25,10 +29,17 @@ import {
   templateUrl: './razorpay-checkout.html',
   styleUrl: './razorpay-checkout.css'
 })
-export class RazorpayCheckout {
+export class RazorpayCheckout implements OnChanges {
 
   private service = inject(RazorpayService);
   private platformId = inject(PLATFORM_ID);
+
+  @Input() customerId: number | null = null;
+  @Input() customerPortal = false;
+  @Input() loanId = 0;
+  @Input() emiId = 0;
+  @Input() amount = 0;
+  @Output() paymentVerified = new EventEmitter<void>();
 
   loading = false;
   error = '';
@@ -42,6 +53,17 @@ export class RazorpayCheckout {
     emiId: 0,
     amount: 500
   };
+
+  ngOnChanges(): void {
+    if (!this.customerPortal) return;
+    this.payment = {
+      ...this.payment,
+      customerId: this.customerId ?? 0,
+      loanId: this.loanId,
+      emiId: this.emiId,
+      amount: this.amount,
+    };
+  }
 
   private loadRazorpay(): Promise<void> {
 
@@ -92,7 +114,7 @@ export class RazorpayCheckout {
     try {
       await this.loadRazorpay();
 
-      this.service.createOrder(this.payment)
+      this.service.createOrder(this.payment, this.customerPortal)
         .subscribe({
           next: order => {
             this.loading = false;
@@ -137,7 +159,7 @@ export class RazorpayCheckout {
         this.loading = true;
         this.message = 'Verifying payment...';
 
-        this.service.verifyPayment(request)
+        this.service.verifyPayment(request, this.customerPortal)
           .subscribe({
             next: result => {
               this.loading = false;
@@ -145,6 +167,7 @@ export class RazorpayCheckout {
 
               this.message =
                 'Payment confirmed and recorded successfully.';
+              this.paymentVerified.emit();
             },
             error: () => {
               this.loading = false;

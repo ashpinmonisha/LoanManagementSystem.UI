@@ -1,5 +1,7 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpContext } from '@angular/common/http';
+import { CUSTOMER_PORTAL_REQUEST } from '../customer-portal-request';
+import { API_BASE_URL } from '../api-url';
 
 export interface EmiDetails {
   emiId: number;
@@ -37,8 +39,7 @@ export class EmiAllocationService {
 
   private http = inject(HttpClient);
 
-  private api =
-    'https://localhost:7085/api/EmiAllocations';
+  private readonly api = `${API_BASE_URL}/EmiAllocations`;
 
   allocate(paymentId: number, emiId: number) {
     return this.http.post<EmiAllocationResult>(
@@ -47,9 +48,10 @@ export class EmiAllocationService {
     );
   }
 
-  getOutstanding(loanId: number) {
+  getOutstanding(loanId: number, customerPortal = false) {
     return this.http.get<EmiOutstanding>(
-      `${this.api}/outstanding/${loanId}`
+      `${this.api}/outstanding/${loanId}`,
+      customerPortal ? { context: new HttpContext().set(CUSTOMER_PORTAL_REQUEST, true) } : {},
     );
   }
 }

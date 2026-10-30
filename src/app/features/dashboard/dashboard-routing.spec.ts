@@ -15,7 +15,8 @@ describe('Employee payment navigation', () => {
         { provide: LoginService, useValue: {
           isLoggedIn: () => true,
           isEmployee: () => true,
-          getEmployee: () => ({ employeeName: 'Employee' }),
+          isAllowedRole: (role: string | undefined) => role?.toLowerCase() === 'employee',
+          getEmployee: () => ({ employeeName: 'Employee', role: 'Employee' }),
         } },
         { provide: LoanApplicationService, useValue: { getApplications: () => of([]) } },
         { provide: PaymentService, useValue: {} },

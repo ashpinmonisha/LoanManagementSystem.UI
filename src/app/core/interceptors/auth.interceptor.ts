@@ -4,13 +4,16 @@ import { Router } from '@angular/router';
 import { catchError, throwError } from 'rxjs';
 import { LoginService } from '../../features/login/login/login.service';
 import { CustomerAuthService } from '../services/customer-auth';
+import { CUSTOMER_PORTAL_REQUEST } from '../customer-portal-request';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const loginService = inject(LoginService);
   const customerAuth = inject(CustomerAuthService);
   const router = inject(Router);
 
-  const customerRequest = /\/api\/(customer|kycdocument|customereligibility)(\/|$)/i.test(req.url);
+  const customerPortalRequest = req.context.get(CUSTOMER_PORTAL_REQUEST);
+  const customerRequest =
+    customerPortalRequest || /\/api\/(customer|kycdocument|customereligibility)(\/|$)/i.test(req.url);
   const token = customerRequest ? customerAuth.getToken() : loginService.getToken();
 
   const authReq = token ? req.clone({ setHeaders: { Authorization: `Bearer ${token}` } }) : req;

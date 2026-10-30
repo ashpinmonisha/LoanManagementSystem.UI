@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { API_BASE_URL } from '../api-url';
 
 export interface PaymentReceipt {
   id: number;
@@ -21,8 +22,7 @@ export interface PaymentReceipt {
 export class PaymentReceiptService {
   private http = inject(HttpClient);
 
-  private apiUrl =
-    'https://localhost:7085/api/PaymentReceipts';
+  private readonly apiUrl = `${API_BASE_URL}/PaymentReceipts`;
 
   generate(paymentId: number): Observable<PaymentReceipt> {
     return this.http.post<PaymentReceipt>(

@@ -17,3 +17,91 @@ select,
 textarea {
   font-family: Inter, "Segoe UI", Arial, sans-serif;
 }
+
+
+#customer-portal .topbar { justify-content: flex-start; gap: 24px; padding-inline: 20px; }
+#customer-portal .brand { display: flex; align-items: center; gap: 10px; white-space: nowrap; }
+#customer-portal .brand-mark { display: grid; place-items: center; width: 38px; height: 38px; margin: 0 !important; border-radius: 12px; color: #fff !important; background: linear-gradient(145deg,#2cbbd0,#087f8c); font-size: 19px !important; }
+#customer-portal .brand-copy { color: #163253; font-size: 16px; letter-spacing: -.3px; text-transform: none; }
+#customer-portal .brand-copy small { display: block; margin-top: 2px; color: #77869a; font-size: 9px; font-weight: 500; letter-spacing: 0; }
+#customer-portal .top-search { display: flex; align-items: center; gap: 9px; width: min(490px,45vw); min-height: 40px; margin-left: 12px; padding: 0 11px; border: 1px solid #e0e8f0; border-radius: 9px; background: #f7f9fc; color: #7a8aa0; }
+#customer-portal .top-search input { width: 100%; min-width: 0; border: 0; outline: 0; color: #243953; background: transparent; font-size: 11px; }
+#customer-portal .top-search button { padding: 7px 10px; border: 0; border-radius: 7px; color: #fff; background: #176bc4; font-size: 10px; font-weight: 700; }
+#customer-portal .account { margin-left: auto; }
+#customer-portal .account .avatar { color: #fff; background: #176bc4; }
+#customer-portal .layout { max-width: none; grid-template-columns: 220px minmax(0,1fr); background: #f4f7fb; }
+#customer-portal .sidebar { gap: 5px; padding: 20px 11px; border: 0; color: #dce8f7; background: linear-gradient(180deg,#153b68,#102d51); }
+#customer-portal .sidebar-label { padding: 2px 12px 9px; color: #9eb4ce; font-size: 9px; font-weight: 800; letter-spacing: 1.2px; }
+#customer-portal .sidebar > button { display: flex; align-items: center; gap: 13px; min-height: 43px; padding: 9px 12px; color: #d1dff0; font-size: 11px; }
+#customer-portal .sidebar > button > span { width: 20px; color: #a9c5e1; font-size: 17px; text-align: center; }
+#customer-portal .sidebar > button:hover { color: #fff; background: #ffffff12; }
+#customer-portal .sidebar > button.active { color: #fff; background: #176bc4; }
+#customer-portal .sidebar > button.active > span { color: #fff; }
+#customer-portal .sidebar-note { margin: auto 4px 0; padding: 15px 11px; border: 1px solid #ffffff16; border-radius: 12px; background: #ffffff0b; }
+#customer-portal .sidebar-note p { color: #b6c8dd; font-size: 10px; }
+#customer-portal .help-icon { display: grid; place-items: center; width: 29px; height: 29px; margin-bottom: 10px; border-radius: 9px; color: #fff; background: #0e9c85; font-weight: 800; }
+#customer-portal .sidebar-note strong { color: #fff; }
+#customer-portal .content { max-width: 1560px; padding: 24px clamp(18px,2.2vw,34px); }
+#customer-portal .dashboard-welcome { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 18px; }
+#customer-portal .dashboard-welcome h1 { margin: 5px 0; color: #172d4c; font-size: clamp(24px,2.5vw,32px); }
+#customer-portal .dashboard-welcome p, #customer-portal .welcome-date span { margin: 0; color: #718198; font-size: 12px; }
+#customer-portal .welcome-date { display: grid; gap: 5px; color: #526880; font-size: 11px; text-align: right; }
+#customer-portal .loan-lookup-card { display: flex; align-items: center; gap: 12px; margin-bottom: 15px; padding: 13px 16px; border: 1px solid #dfe9f3; border-radius: 11px; background: #fff; box-shadow: 0 4px 16px #173a5807; }
+#customer-portal .loan-lookup-card > div { display: flex; align-items: center; gap: 10px; flex: 1; }
+#customer-portal .step-badge { display: grid; place-items: center; flex: 0 0 auto; width: 29px; height: 29px; border-radius: 9px; color: #087f8c; background: #e6f6fa; font-size: 10px; font-weight: 800; }
+#customer-portal .loan-lookup-card strong { color: #243953; font-size: 11px; }
+#customer-portal .loan-lookup-card p { margin: 3px 0 0; color: #76869a; font-size: 10px; }
+#customer-portal .loan-id-field input { width: 130px; min-height: 35px; padding: 8px 10px; border: 1px solid #dce5ee; border-radius: 7px; font-size: 11px; }
+#customer-portal .loan-lookup-card > button { min-height: 35px; padding: 8px 12px; border: 0; border-radius: 7px; color: #fff; background: #176bc4; font-size: 10px; font-weight: 750; }
+#customer-portal .loan-lookup-card > button:disabled { opacity: .6; }
+#customer-portal .dashboard-metrics { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 11px; margin-bottom: 14px; }
+#customer-portal .dashboard-metric { display: flex; align-items: center; gap: 11px; min-width: 0; padding: 15px 13px; border: 1px solid #e2eaf2; border-radius: 11px; background: #fff; box-shadow: 0 4px 16px #173a5807; }
+#customer-portal .metric-icon { display: grid; place-items: center; flex: 0 0 auto; width: 39px; height: 39px; border-radius: 50%; color: #176bc4; background: #e7f2ff; font-size: 18px; font-weight: 800; }
+#customer-portal .dashboard-metric > div { display: grid; gap: 4px; min-width: 0; }
+#customer-portal .dashboard-metric > div > span { color: #61758d; font-size: 9px; }
+#customer-portal .dashboard-metric strong { color: #172d4c; font-size: clamp(14px,1.4vw,19px); letter-spacing: -.3px; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+#customer-portal .dashboard-metric small { color: #7a8ba0; font-size: 9px; }
+#customer-portal .loan-balance .metric-icon, #customer-portal .payment-state .metric-icon { color: #0a987c; background: #def6ed; }
+#customer-portal .next-due .metric-icon { color: #c97737; background: #fff0e3; }
+#customer-portal .metric-arrow { margin-left: auto; border: 0; color: #7b8ca0; background: transparent; font-size: 23px; }
+#customer-portal .dashboard-panels { display: grid; grid-template-columns: 1.2fr 1fr; gap: 13px; }
+#customer-portal .dashboard-card { min-width: 0; padding: 16px; border: 1px solid #e2eaf2; border-radius: 11px; background: #fff; box-shadow: 0 4px 16px #173a5807; }
+#customer-portal .card-title { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 13px; }
+#customer-portal .card-title h2 { margin: 0 0 4px; color: #1b304d; font-size: 13px; }
+#customer-portal .card-title p { margin: 0; color: #7a8ba0; font-size: 10px; }
+#customer-portal .link-button { flex: 0 0 auto; padding: 5px 0; border: 0; color: #176bc4; background: none; font-size: 10px; font-weight: 700; }
+#customer-portal .progress-content { display: flex; align-items: center; justify-content: center; gap: clamp(18px,4vw,52px); min-height: 155px; }
+#customer-portal .progress-ring { display: grid; place-items: center; flex: 0 0 auto; width: 130px; aspect-ratio: 1; border-radius: 50%; background: conic-gradient(#15ae91 var(--progress),#e2effd var(--progress)); }
+#customer-portal .progress-ring > div { display: grid; place-content: center; width: 101px; aspect-ratio: 1; border-radius: 50%; background: white; text-align: center; }
+#customer-portal .progress-ring strong { color: #172d4c; font-size: 24px; }
+#customer-portal .progress-ring span { color: #718198; font-size: 10px; }
+#customer-portal .progress-legend { display: grid; gap: 12px; width: min(260px,100%); }
+#customer-portal .progress-legend > div { display: grid; grid-template-columns: 10px 1fr auto; align-items: center; gap: 8px; color: #687b91; font-size: 9px; }
+#customer-portal .progress-legend strong { color: #273f5b; font-size: 10px; white-space: nowrap; }
+#customer-portal .legend-dot { width: 9px; height: 9px; border-radius: 50%; background: #cfe4fb; }
+#customer-portal .legend-dot.repaid { background: #18af91; }#customer-portal .legend-dot.remaining { background: #83baff; }
+#customer-portal .compact-table, #customer-portal .table-scroll { overflow-x: auto; }
+#customer-portal .compact-table table { width: 100%; border-collapse: collapse; text-align: left; }
+#customer-portal .compact-table th, #customer-portal .compact-table td { padding: 9px 8px; border-bottom: 1px solid #edf1f5; font-size: 9px; white-space: nowrap; }
+#customer-portal .compact-table th { color: #64768b; background: #f5f8fc; font-weight: 750; }
+#customer-portal .compact-table td { color: #485c74; }
+#customer-portal .compact-table tbody tr:last-child td { border-bottom: 0; }
+#customer-portal .emi-status { display: inline-flex; padding: 4px 7px; border-radius: 999px; color: #176bc4; background: #e9f3ff; font-size: 8px; font-weight: 750; text-transform: capitalize; }
+#customer-portal .emi-status.paid { color: #087568; background: #e4f7ee; }
+#customer-portal .recent-card { grid-column: 1; }#customer-portal .quick-actions { grid-column: 2; grid-row: 2; }
+#customer-portal .quick-actions .card-title { margin-bottom: 10px; }
+#customer-portal .quick-action { display: flex; align-items: center; gap: 10px; width: 100%; margin-top: 7px; padding: 10px 11px; border: 0; border-radius: 8px; color: #35506e; background: #f2f7fc; text-align: left; font-size: 10px; font-weight: 700; }
+#customer-portal .quick-action > span:first-child { color: #176bc4; font-size: 15px; }
+#customer-portal .quick-action > span:last-child { margin-left: auto; color: #8193a7; font-size: 16px; }
+#customer-portal .quick-action.primary { color: #fff; background: #176bc4; }
+#customer-portal .quick-action.primary > span { color: #fff; }
+#customer-portal .quick-action:disabled { cursor: not-allowed; opacity: .55; }
+#customer-portal .truncate { max-width: 110px; overflow: hidden; text-overflow: ellipsis; }
+#customer-portal .loan-detail-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 11px; margin-bottom: 16px; }
+#customer-portal .loan-detail-grid > div { display: grid; gap: 7px; padding: 14px; border: 1px solid #e3ebf3; border-radius: 9px; background: #f8fbff; }
+#customer-portal .loan-detail-grid span { color: #718198; font-size: 10px; }#customer-portal .loan-detail-grid strong { color: #183350; font-size: 14px; }
+#customer-portal .schedule-full .table-scroll { border: 1px solid #e8edf3; border-radius: 8px; }
+#customer-portal .visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+@media(max-width:1050px){#customer-portal .dashboard-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}#customer-portal .dashboard-panels{grid-template-columns:1fr}#customer-portal .recent-card, #customer-portal .quick-actions{grid-column:auto;grid-row:auto}}
+@media(max-width:760px){#customer-portal .layout{grid-template-columns:1fr}#customer-portal .sidebar{position:sticky;top:72px;z-index:2;flex-direction:row;overflow-x:auto;gap:3px;padding:8px}#customer-portal .sidebar-label, #customer-portal .sidebar-note{display:none}#customer-portal .sidebar>button{flex:0 0 auto;min-height:40px;padding:8px 10px}#customer-portal .sidebar>button>span{width:auto}#customer-portal .content{padding:20px 14px}#customer-portal .top-search{order:3;flex:1 0 100%;width:100%;margin:0}#customer-portal .topbar{flex-wrap:wrap;gap:12px;padding:12px 14px}#customer-portal .account{gap:7px}#customer-portal .dashboard-welcome{align-items:flex-start}#customer-portal .loan-lookup-card{flex-wrap:wrap}#customer-portal .loan-lookup-card>div{flex-basis:100%}#customer-portal .loan-id-field{flex:1}#customer-portal .loan-id-field input{width:100%}}
+@media(max-width:520px){#customer-portal .dashboard-welcome{flex-direction:column}#customer-portal .welcome-date{text-align:left}#customer-portal .dashboard-metrics{gap:8px}#customer-portal .dashboard-metric{align-items:flex-start;flex-direction:column;gap:8px;padding:12px}#customer-portal .dashboard-metric strong{font-size:14px}#customer-portal .progress-content{flex-direction:column;padding:10px 0}#customer-portal .progress-legend{width:100%}#customer-portal .dashboard-card{padding:13px}#customer-portal .loan-detail-grid{grid-template-columns:repeat(2,minmax(0,1fr))}#customer-portal .account>div:nth-child(2){display:none}#customer-portal .top-search button{padding-inline:8px}}

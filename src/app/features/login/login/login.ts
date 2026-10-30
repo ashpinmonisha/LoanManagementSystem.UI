@@ -42,9 +42,9 @@ export class LoginComponent {
       next: (response) => {
         this.loading = false;
 
-        if (response.employee.role?.toLowerCase() !== 'employee') {
+        if (!this.loginService.isAllowedRole(response.employee.role)) {
           this.loginService.logout();
-          this.errorMessage = 'This account does not have the Employee role.';
+          this.errorMessage = 'Your account does not have access.';
           this.cdr.markForCheck();
           return;
         }

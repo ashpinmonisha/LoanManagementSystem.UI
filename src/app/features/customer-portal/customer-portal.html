@@ -1,6 +1,18 @@
-<div class="portal">
+<div id="customer-portal" class="portal">
   <header class="topbar">
-    <a class="brand" href="/customer">LoanSphere <span>Customer</span></a>
+    <a class="brand" href="/customer"><span class="brand-mark" aria-hidden="true">◆</span><span class="brand-copy">LoanSphere<small>Loan Management System</small></span></a>
+    <form class="top-search" (ngSubmit)="loadDashboardLoan()">
+      <span aria-hidden="true">⌕</span>
+      <input
+        type="number"
+        name="quickLoanId"
+        min="1"
+        placeholder="Search your loan ID to see payments"
+        aria-label="Search loan ID"
+        [(ngModel)]="dashboardLoanId"
+      />
+      <button type="submit" [disabled]="dashboardLoading">View</button>
+    </form>
     <div class="account">
       <div class="avatar">{{ customer?.fullName?.charAt(0) || 'C' }}</div>
       <div>
@@ -13,37 +25,232 @@
 
   <div class="layout">
     <aside class="sidebar">
-      <span class="eyebrow">YOUR ACCOUNT</span>
+      <span class="sidebar-label">CUSTOMER MENU</span>
+      <button type="button" [class.active]="section === 'dashboard'" (click)="section = 'dashboard'">
+        <span aria-hidden="true">⌂</span>Dashboard
+      </button>
+      <button type="button" [class.active]="section === 'loans'" (click)="section = 'loans'">
+        <span aria-hidden="true">▤</span>My loans
+      </button>
+      <button
+        type="button"
+        [class.active]="section === 'schedule'"
+        (click)="section = 'schedule'"
+      >
+        <span aria-hidden="true">▦</span>EMI schedule
+      </button>
+      <button
+        type="button"
+        [class.active]="section === 'payments'"
+        (click)="section = 'payments'"
+      >
+        <span aria-hidden="true">▣</span>Payments
+      </button>
       <button type="button" [class.active]="section === 'profile'" (click)="section = 'profile'">
-        Profile
+        <span aria-hidden="true">♙</span>Profile
       </button>
       <button type="button" [class.active]="section === 'kyc'" (click)="section = 'kyc'">
-        KYC documents
+        <span aria-hidden="true">▧</span>KYC documents
       </button>
       <button
         type="button"
         [class.active]="section === 'eligibility'"
         (click)="section = 'eligibility'"
       >
-        Eligibility profile
+        <span aria-hidden="true">◉</span>Eligibility profile
       </button>
       <div class="sidebar-note">
+        <div class="help-icon" aria-hidden="true">✓</div>
         <strong>Secure loan journey</strong>
-        <p>Keep your contact, identity and financial information up to date.</p>
+        <p>Your loan and payment information is available after you sign in.</p>
       </div>
     </aside>
 
     <main class="content">
-      <section class="welcome">
-        <div>
-          <span class="eyebrow">CUSTOMER &amp; KYC MANAGEMENT</span>
-          <h1>Hello, {{ customer?.fullName || 'Customer' }}</h1>
-          <p>Manage your account details and prepare your customer profile.</p>
-        </div>
-        <div class="customer-id">
-          Customer ID <strong>#{{ customer?.customerId }}</strong>
-        </div>
-      </section>
+      @if (section === 'dashboard' || section === 'loans') {
+        <section class="dashboard-welcome">
+          <div>
+            <span class="eyebrow">{{ section === 'dashboard' ? 'CUSTOMER DASHBOARD' : 'YOUR LOAN ACCOUNT' }}</span>
+            <h1>Welcome back, {{ customer?.fullName || 'Customer' }}!</h1>
+            <p>Here’s an overview of your loan account and payment status.</p>
+          </div>
+          <div class="welcome-date">
+            <strong>{{ today | date: 'EEE, d MMM y' }}</strong>
+            <span>Manage your loan securely</span>
+          </div>
+        </section>
+
+        <form class="loan-lookup-card" (ngSubmit)="loadDashboardLoan()">
+          <div>
+            <span class="step-badge">01</span>
+            <div>
+              <strong>Load your loan dashboard</strong>
+              <p>Enter the loan ID from your loan approval to view your live balance and EMI schedule.</p>
+            </div>
+          </div>
+          <label class="loan-id-field">
+            <span class="visually-hidden">Loan ID</span>
+            <input
+              type="number"
+              name="dashboardLoanId"
+              min="1"
+              placeholder="Loan ID"
+              [(ngModel)]="dashboardLoanId"
+              required
+            />
+          </label>
+          <button type="submit" [disabled]="dashboardLoading">
+            {{ dashboardLoading ? 'Loading…' : 'Load loan' }} <span aria-hidden="true">→</span>
+          </button>
+        </form>
+
+        @if (dashboardError) {
+          <p class="notice error" role="alert">{{ dashboardError }}</p>
+        }
+
+        @if (dashboardLoading) {
+          <p class="status-message" role="status">Loading your loan balance and payments…</p>
+        } @else if (dashboardOutstanding; as balance) {
+          <section class="dashboard-metrics" aria-label="Loan payment summary">
+            <article class="dashboard-metric loan-total">
+              <span class="metric-icon" aria-hidden="true">▤</span>
+              <div><span>Total scheduled EMIs</span><strong>{{ balance.totalEmiAmount | currency: 'INR' }}</strong><small>Loan #{{ dashboardLoanId }}</small></div>
+            </article>
+            <article class="dashboard-metric loan-balance">
+              <span class="metric-icon" aria-hidden="true">₹</span>
+              <div><span>Outstanding balance</span><strong>{{ balance.totalOutstanding | currency: 'INR' }}</strong><small>{{ balance.totalEmiAmount > 0 ? (remainingPercent | percent: '1.0-0') + ' remaining' : 'No outstanding EMIs' }}</small></div>
+            </article>
+            <article class="dashboard-metric next-due">
+              <span class="metric-icon" aria-hidden="true">▦</span>
+              <div><span>Next EMI due</span><strong>{{ nextEmi ? (nextEmi.remainingAmount | currency: 'INR') : '—' }}</strong><small>{{ nextEmi ? ('Due ' + (nextEmi.dueDate | date: 'd MMM y')) : 'No due payments' }}</small></div>
+              @if (nextEmi) { <button type="button" class="metric-arrow" aria-label="Make payment" (click)="openPayments()">›</button> }
+            </article>
+            <article class="dashboard-metric payment-state">
+              <span class="metric-icon" aria-hidden="true">{{ balance.overdueAmount > 0 ? '!' : '✓' }}</span>
+              <div><span>Payment status</span><strong>{{ dashboardPaymentStatus }}</strong><small>{{ balance.overdueAmount > 0 ? (balance.overdueAmount | currency: 'INR') + ' overdue' : (nextEmi ? 'Next payment is scheduled' : 'No due payments') }}</small></div>
+            </article>
+          </section>
+
+          <div class="dashboard-panels">
+            <section class="dashboard-card progress-card">
+              <header class="card-title">
+                <div><h2>Loan repayment progress</h2><p>Your repayment journey</p></div>
+                <button type="button" class="link-button" (click)="section = 'loans'">Loan details <span aria-hidden="true">→</span></button>
+              </header>
+              <div class="progress-content">
+                <div class="progress-ring" [style.--progress]="repaymentPercent + '%'">
+                  <div><strong>{{ repaymentPercent | number: '1.0-0' }}%</strong><span>Repaid</span></div>
+                </div>
+                <div class="progress-legend">
+                  <div><span class="legend-dot repaid"></span><span>Amount repaid</span><strong>{{ balance.totalPaid | currency: 'INR' }}</strong></div>
+                  <div><span class="legend-dot remaining"></span><span>Outstanding balance</span><strong>{{ balance.totalOutstanding | currency: 'INR' }}</strong></div>
+                  <div><span class="legend-dot total"></span><span>Total scheduled EMIs</span><strong>{{ balance.totalEmiAmount | currency: 'INR' }}</strong></div>
+                </div>
+              </div>
+            </section>
+
+            <section class="dashboard-card schedule-card">
+              <header class="card-title">
+                <div><h2>Upcoming EMI schedule</h2><p>Due dates and remaining amounts</p></div>
+                <button type="button" class="link-button" (click)="section = 'schedule'">View all <span aria-hidden="true">→</span></button>
+              </header>
+              @if (dashboardEmis.length) {
+                <div class="compact-table">
+                  <table>
+                    <thead><tr><th>EMI</th><th>Due date</th><th>Amount</th><th>Status</th></tr></thead>
+                    <tbody>
+                      @for (emi of dashboardEmis.slice(0, 5); track emi.emiId) {
+                        <tr><td>#{{ emi.emiId }}</td><td>{{ emi.dueDate | date: 'd MMM y' }}</td><td>{{ emi.remainingAmount | currency: 'INR' }}</td><td><span class="emi-status" [class.paid]="emi.remainingAmount <= 0 || ['paid', 'completed'].includes(emi.status.toLowerCase())">{{ emi.remainingAmount <= 0 || ['paid', 'completed'].includes(emi.status.toLowerCase()) ? 'Paid' : emi.status }}</span></td></tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              } @else {
+                <p class="empty-state">No EMI schedule was returned for this loan.</p>
+              }
+            </section>
+
+            <section class="dashboard-card recent-card">
+              <header class="card-title">
+                <div><h2>Recent payments</h2><p>Latest transactions for this loan</p></div>
+                <button type="button" class="link-button" (click)="section = 'payments'">Payment history <span aria-hidden="true">→</span></button>
+              </header>
+              @if (dashboardHistoryError) {
+                <p class="notice error" role="alert">{{ dashboardHistoryError }}</p>
+              } @else if (recentPayments.length) {
+                <div class="compact-table">
+                  <table>
+                    <thead><tr><th>Date</th><th>Method</th><th>Amount</th><th>Reference</th><th>Status</th></tr></thead>
+                    <tbody>
+                      @for (payment of recentPayments; track payment.paymentId) {
+                        <tr><td>{{ payment.paymentDate | date: 'd MMM y' }}</td><td>{{ payment.paymentMethod }}</td><td>{{ payment.amount | currency: 'INR' }}</td><td class="truncate">{{ payment.paymentReference }}</td><td><span class="emi-status paid">{{ payment.paymentStatus }}</span></td></tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              } @else {
+                <p class="empty-state">No payments have been recorded for this loan yet.</p>
+              }
+            </section>
+
+            <section class="dashboard-card quick-actions">
+              <header class="card-title"><div><h2>Quick actions</h2><p>Manage your loan</p></div></header>
+              <button type="button" class="quick-action primary" (click)="openPayments()" [disabled]="!nextEmi"><span aria-hidden="true">▣</span>Make payment<span aria-hidden="true">›</span></button>
+              <button type="button" class="quick-action" (click)="section = 'schedule'"><span aria-hidden="true">▦</span>View EMI schedule<span aria-hidden="true">›</span></button>
+              <button type="button" class="quick-action" (click)="section = 'payments'"><span aria-hidden="true">↻</span>Payment history<span aria-hidden="true">›</span></button>
+              <button type="button" class="quick-action" (click)="section = 'profile'"><span aria-hidden="true">♙</span>Update profile<span aria-hidden="true">›</span></button>
+            </section>
+          </div>
+        }
+      }
+
+      @if (section !== 'dashboard' && section !== 'loans') {
+        <section class="welcome">
+          <div>
+            <span class="eyebrow">CUSTOMER &amp; LOAN MANAGEMENT</span>
+            <h1>{{ section === 'payments' ? 'Payments' : section === 'schedule' ? 'EMI schedule' : section === 'profile' ? 'Your profile' : section === 'kyc' ? 'KYC documents' : 'Eligibility profile' }}</h1>
+            <p>Welcome back, {{ customer?.fullName || 'Customer' }}. Manage your loan account securely.</p>
+          </div>
+          <div class="customer-id">Customer ID <strong>#{{ customer?.customerId }}</strong></div>
+        </section>
+      }
+
+      @if (section === 'schedule') {
+        <section class="panel schedule-full">
+          <div class="panel-heading">
+            <div><span class="eyebrow">REPAYMENT PLAN</span><h2>EMI schedule</h2><p>Load your loan from the dashboard to see due dates and remaining payments.</p></div>
+            @if (dashboardOutstanding) { <span class="status verified">Loan #{{ dashboardLoanId }}</span> }
+          </div>
+          @if (!dashboardOutstanding) {
+            <p class="empty-state">No loan is loaded. Go to Dashboard and enter your loan ID.</p>
+          } @else if (dashboardEmis.length) {
+            <div class="table-scroll"><table><thead><tr><th>EMI</th><th>Due date</th><th>Scheduled amount</th><th>Paid</th><th>Remaining</th><th>Status</th></tr></thead><tbody>
+              @for (emi of dashboardEmis; track emi.emiId) {
+                <tr><td>#{{ emi.emiId }}</td><td>{{ emi.dueDate | date: 'mediumDate' }}</td><td>{{ emi.emiAmount | currency: 'INR' }}</td><td>{{ emi.amountPaid | currency: 'INR' }}</td><td>{{ emi.remainingAmount | currency: 'INR' }}</td><td><span class="status" [class.verified]="emi.remainingAmount <= 0 || ['paid', 'completed'].includes(emi.status.toLowerCase())">{{ emi.remainingAmount <= 0 || ['paid', 'completed'].includes(emi.status.toLowerCase()) ? 'Paid' : emi.status }}</span></td></tr>
+              }
+            </tbody></table></div>
+          } @else { <p class="empty-state">The backend did not return EMI schedule entries.</p> }
+        </section>
+      }
+
+      @if (section === 'loans') {
+        <section class="panel">
+          <div class="panel-heading"><div><span class="eyebrow">LOAN ACCOUNT</span><h2>My loan</h2><p>Your loan balance and repayments are loaded directly from the payment API.</p></div><button class="secondary-button" type="button" (click)="section = 'dashboard'">Back to dashboard</button></div>
+          @if (dashboardOutstanding) {
+            <div class="loan-detail-grid">
+              <div><span>Loan ID</span><strong>#{{ dashboardLoanId }}</strong></div>
+              <div><span>Total scheduled EMIs</span><strong>{{ dashboardOutstanding.totalEmiAmount | currency: 'INR' }}</strong></div>
+              <div><span>Paid</span><strong>{{ dashboardOutstanding.totalPaid | currency: 'INR' }}</strong></div>
+              <div><span>Outstanding</span><strong>{{ dashboardOutstanding.totalOutstanding | currency: 'INR' }}</strong></div>
+              <div><span>Overdue</span><strong>{{ dashboardOutstanding.overdueAmount | currency: 'INR' }}</strong></div>
+            </div>
+            <p class="disclaimer">Loan amount, term and interest details are not included in the currently connected customer payment API.</p>
+            <button type="button" class="primary-button" (click)="section = 'schedule'">View EMI schedule</button>
+          } @else {
+            <p class="empty-state">Load a loan from the Dashboard to see its live details.</p>
+          }
+        </section>
+      }
 
       @if (section === 'profile') {
         <section class="panel">
@@ -129,6 +336,14 @@
             </form>
           }
         </section>
+      }
+
+      @if (section === 'payments') {
+        <app-customer-payments
+          [customerId]="customer?.customerId ?? 0"
+          [initialLoanId]="dashboardLoanId"
+          (paymentUpdated)="loadDashboardLoan()"
+        />
       }
 
       @if (section === 'kyc') {

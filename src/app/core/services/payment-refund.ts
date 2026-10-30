@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { API_BASE_URL } from '../api-url';
 
 export interface CreateRefundDto {
   paymentId: number;
@@ -28,8 +29,7 @@ export interface RefundResponseDto {
 export class PaymentRefundService {
   private http = inject(HttpClient);
 
-  private apiUrl =
-    'https://localhost:7085/api/PaymentRefunds';
+  private readonly apiUrl = `${API_BASE_URL}/PaymentRefunds`;
 
   requestRefund(dto: CreateRefundDto):
     Observable<RefundResponseDto> {
