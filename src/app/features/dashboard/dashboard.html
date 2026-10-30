@@ -1,18 +1,19 @@
-@if (isEmployee) {
+@if (hasDashboardAccess) {
   <div class="dashboard">
+    <a class="skip-link" href="#employee-content">Skip to dashboard content</a>
     <header class="topbar">
-      <a class="brand" routerLink="/dashboard"><span class="brand-icon">&#8377;</span>LoanSphere</a>
+      <a class="brand" routerLink="/dashboard"><span class="brand-icon">&#8377;</span><span>LoanSphere<small>Loan Management System</small></span></a>
       <label class="search-box"
         ><input
-          aria-label="Search applications"
-          placeholder="Search applications..."
+          aria-label="Search loans, customers, applications and payments"
+          placeholder="Search customers, loan ID, applications, payments..."
           (input)="searchTerm = $any($event.target).value"
       /></label>
       <div class="employee-info">
         <div class="avatar">{{ employee?.employeeName?.charAt(0) || 'E' }}</div>
         <div class="employee-name">
           <strong>{{ employee?.employeeName }}</strong
-          ><small>Employee</small>
+          ><small>{{ employee?.role }}</small>
         </div>
         <button class="logout-button" (click)="logout()">Logout</button>
       </div>
@@ -20,31 +21,144 @@
     <div class="workspace">
       <aside class="sidebar">
         <nav aria-label="Employee navigation">
-          <a class="active" routerLink="/dashboard" aria-current="page">Dashboard</a>
-          <a routerLink="/dashboard" fragment="growth">Growth overview</a>
-          <a routerLink="/dashboard" fragment="applications">Approve / Reject</a>
-          <a routerLink="/dashboard" fragment="payment-summary">Payment summary</a>
-          <a routerLink="/dashboard" fragment="notifications"
-            >Notifications ({{ notifications.length }})</a
-          >
+          <a [class.active]="selectedPage === 'overview'" routerLink="/dashboard" [attr.aria-current]="selectedPage === 'overview' ? 'page' : null"><span aria-hidden="true">⌂</span>Dashboard</a>
+          <a [class.active]="selectedPage === 'applications'" [attr.aria-current]="selectedPage === 'applications' ? 'page' : null" routerLink="/dashboard" fragment="applications"><span aria-hidden="true">▤</span>Loan applications</a>
+          <a routerLink="/dashboard/payments" [class.active]="selectedPage === 'payments'" [attr.aria-current]="selectedPage === 'payments' ? 'page' : null"><span aria-hidden="true">▣</span>Payments &amp; collections</a>
+          <a [class.active]="selectedPage === 'payment-summary'" [attr.aria-current]="selectedPage === 'payment-summary' ? 'page' : null" routerLink="/dashboard" fragment="payment-summary"><span aria-hidden="true">₹</span>Payment summary</a>
+          <a [class.active]="selectedPage === 'growth'" [attr.aria-current]="selectedPage === 'growth' ? 'page' : null" routerLink="/dashboard" fragment="growth"><span aria-hidden="true">▥</span>Reports</a>
+          <a [class.active]="selectedPage === 'notifications'" [attr.aria-current]="selectedPage === 'notifications' ? 'page' : null" routerLink="/dashboard" fragment="notifications"><span aria-hidden="true">♧</span>Notifications <b>{{ notifications.length }}</b></a>
         </nav>
-        <div class="sidebar-footer">LoanSphere<small>Employee Portal</small></div>
+        <div class="sidebar-footer">LoanSphere<small>{{ employee?.role }} Portal</small></div>
       </aside>
-      <main class="content">
+      <main class="content" id="employee-content" tabindex="-1">
         <section class="welcome">
           <div class="welcome-copy">
             <span class="eyebrow">EMPLOYEE WORKSPACE</span>
-            <h1>Welcome, {{ employee?.employeeName || 'Employee' }}!</h1>
-            <p>Track money coming in, loan commitments and collection growth in one dashboard.</p>
+            <h1>{{ pageTitle }}</h1>
+            @if (selectedPage === 'overview') {
+            <p>Your applications, collections and next decisions, all in one place.</p>
+            }
           </div>
+          <div class="welcome-actions">
+          <a class="primary-button" routerLink="/dashboard" fragment="applications">Review applications &rarr;</a>
           <button
-            class="primary-button"
+            class="secondary-button"
             (click)="loadApplications()"
             [disabled]="loading || paymentsLoading"
           >
-            Refresh dashboard
+            {{ loading || paymentsLoading ? 'Refreshing...' : 'Refresh data' }}
           </button>
+          </div>
         </section>
+        @if (selectedPage === 'overview') {
+        <section class="stats" aria-label="Application statistics">
+          <article class="stat-card pending">
+            <span class="stat-icon" aria-hidden="true">▤</span><div><span>Pending approvals</span><strong>{{ pendingCount }}</strong><small>Awaiting your review</small></div>
+          </article>
+          <article class="stat-card approved">
+            <span class="stat-icon" aria-hidden="true">▣</span><div><span>Active loans</span><strong>{{ activeLoanCount }}</strong><small>Approved and running</small></div>
+          </article>
+          <article class="stat-card total">
+            <span class="stat-icon" aria-hidden="true">₹</span><div><span>Today's collections</span><strong>{{ todayCollections | currency: 'INR' : 'symbol' : '1.0-0' }}</strong><small>From {{ todayPaymentCount }} successful payments</small></div>
+          </article>
+          <article class="stat-card rejected">
+            <span class="stat-icon" aria-hidden="true">!</span><div><span>Overdue loans</span><strong>{{ overdueLoanCount }}</strong><small>{{ overdueAmount | currency: 'INR' }} overdue</small></div>
+          </article>
+          <article class="stat-card customers">
+            <span class="stat-icon" aria-hidden="true">♙</span><div><span>Customers</span><strong>{{ customerCount }}</strong><small>With loan applications</small></div>
+          </article>
+        </section>
+        <section class="employee-overview" aria-label="Employee work overview">
+          <div class="overview-main">
+            <section class="overview-card approval-queue">
+              <header class="overview-card-heading">
+                <div><h2>Loan approval queue</h2><p>Review and take action on pending applications.</p></div>
+                <a routerLink="/dashboard" fragment="applications">View all <span aria-hidden="true">→</span></a>
+              </header>
+              @if (loading) {
+                <p class="overview-loading" role="status">Loading loan applications…</p>
+              } @else if (errorMessage) {
+                <p class="overview-error" role="alert">{{ errorMessage }}</p>
+              } @else {
+                <div class="overview-table-scroll">
+                  <table>
+                    <thead><tr><th>#</th><th>Customer ID</th><th>Loan ID</th><th>Amount</th><th>Applied</th><th>Status</th><th>Action</th></tr></thead>
+                    <tbody>
+                      @for (loan of approvalQueue; track loan.loanApplicationId; let i = $index) {
+                        <tr>
+                          <td>{{ i + 1 }}</td><td>{{ loan.customerId }}</td><td>#{{ loan.loanApplicationId }}</td>
+                          <td>{{ loan.loanAmount | currency: 'INR' : 'symbol' : '1.0-0' }}</td>
+                          <td>{{ loan.applicationDate ? (loan.applicationDate | date: 'd MMM y') : '—' }}</td>
+                          <td><span class="overview-status pending">{{ loan.status }}</span></td>
+                          <td><a class="overview-action" [routerLink]="['/loan-approval', loan.loanApplicationId]">Review</a></td>
+                        </tr>
+                      } @empty {
+                        <tr><td class="overview-empty" colspan="7">{{ searchTerm ? 'No matching pending applications.' : 'No applications are waiting for review.' }}</td></tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              }
+            </section>
+
+            <div class="overview-lower">
+              <section class="overview-card collection-card">
+                <header class="overview-card-heading">
+                  <div><h2>Recent payments &amp; collections</h2><p>Latest recorded payment transactions.</p></div>
+                  <a routerLink="/dashboard/payments">View all <span aria-hidden="true">→</span></a>
+                </header>
+                @if (loading || paymentsLoading) {
+                  <p class="overview-loading" role="status">Loading payment records…</p>
+                } @else if (paymentDataIncomplete) {
+                  <p class="overview-warning" role="status">Some payment records are unavailable; the list may be incomplete.</p>
+                }
+                <div class="overview-table-scroll">
+                  <table>
+                    <thead><tr><th>Date</th><th>Customer ID</th><th>Loan</th><th>Amount</th><th>Method</th><th>Status</th></tr></thead>
+                    <tbody>
+                      @for (payment of recentPayments; track payment.paymentId) {
+                        <tr><td>{{ paymentDateLabel(payment.paymentDate) }}</td><td>{{ payment.customerId }}</td><td>#{{ payment.loanId }}</td><td>{{ payment.amount | currency: 'INR' : 'symbol' : '1.0-0' }}</td><td>{{ payment.paymentMethod || '—' }}</td><td><span class="overview-status" [class.paid]="['success', 'successful', 'completed', 'paid'].includes((payment.paymentStatus ?? '').toLowerCase())" [class.pending]="(payment.paymentStatus ?? '').toLowerCase() === 'pending'">{{ payment.paymentStatus || 'Unknown' }}</span></td></tr>
+                      } @empty {
+                        @if (!loading && !paymentsLoading) { <tr><td class="overview-empty" colspan="6">{{ searchTerm ? 'No matching payment records.' : 'No payment history is available.' }}</td></tr> }
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+
+              <section class="overview-card collections-chart-card">
+                <header class="overview-card-heading"><div><h2>Monthly collections</h2><p>Successful repayments received</p></div><span class="chart-period">Last {{ growthMonths }} months</span></header>
+                <div class="collection-chart" role="img" aria-label="Successful payment collections by month">
+                  @for (month of growthData; track month.label) {
+                    <div class="collection-month"><strong>{{ month.incoming | currency: 'INR' : 'symbol' : '1.0-0' }}</strong><div class="collection-bar-track"><span class="collection-bar" [style.height.%]="collectionHeight(month.incoming)"></span></div><small>{{ month.label }}</small></div>
+                  }
+                </div>
+                <p class="chart-footnote">Amounts are calculated from successful payment records.</p>
+              </section>
+            </div>
+          </div>
+
+          <aside class="overview-side">
+            <section class="overview-card quick-actions-card">
+              <header class="overview-card-heading"><div><h2>Quick actions</h2><p>Common tasks for your workday.</p></div></header>
+              <a class="overview-quick primary" routerLink="/dashboard" fragment="applications"><span aria-hidden="true">▤</span>Review applications<span aria-hidden="true">›</span></a>
+              <a class="overview-quick" routerLink="/dashboard/payments"><span aria-hidden="true">₹</span>View payments<span aria-hidden="true">›</span></a>
+              <a class="overview-quick" routerLink="/dashboard" fragment="payment-summary"><span aria-hidden="true">▣</span>Payment summary<span aria-hidden="true">›</span></a>
+              <a class="overview-quick" routerLink="/dashboard" fragment="growth"><span aria-hidden="true">▥</span>Collection reports<span aria-hidden="true">›</span></a>
+            </section>
+            <section class="overview-card alerts-card">
+              <header class="overview-card-heading"><div><h2>Alerts &amp; notifications</h2><p>Items that may need attention.</p></div><a routerLink="/dashboard" fragment="notifications">View all <span aria-hidden="true">→</span></a></header>
+              @if (paymentsLoading) { <p class="overview-loading" role="status">Loading payment alerts…</p> }
+              @for (notification of notifications.slice(0, 5); track notification.message) {
+                <div class="overview-alert"><span class="alert-icon" [class.alert-warning]="notification.loanId || notification.message.includes('awaiting')" aria-hidden="true">{{ notification.loanId ? '!' : '✓' }}</span><div><p>{{ notification.message }}</p><a routerLink="/dashboard" [fragment]="notification.loanId ? 'loan-' + notification.loanId : 'applications'">Review item</a></div></div>
+              } @empty {
+                @if (!paymentsLoading) { <p class="overview-empty">No items need attention.</p> }
+              }
+            </section>
+          </aside>
+        </section>
+        }
+        @if (selectedPage === 'growth') {
         <section id="growth" class="applications-panel growth-panel" aria-label="Growth dashboard">
           <div class="panel-header">
             <div>
@@ -176,32 +290,8 @@
             </p>
           }
         </section>
-        <section class="stats" aria-label="Application statistics">
-          <article class="stat-card pending">
-            <div>
-              <span>Awaiting decision</span><strong>{{ pendingCount }}</strong
-              ><small>Applications to approve or reject</small>
-            </div>
-          </article>
-          <article class="stat-card approved">
-            <div>
-              <span>Approved</span><strong>{{ approvedCount }}</strong
-              ><small>Approved applications</small>
-            </div>
-          </article>
-          <article class="stat-card rejected">
-            <div>
-              <span>Rejected</span><strong>{{ rejectedCount }}</strong
-              ><small>Rejected applications</small>
-            </div>
-          </article>
-          <article class="stat-card total">
-            <div>
-              <span>Notifications</span><strong>{{ notifications.length }}</strong
-              ><small>Items needing attention</small>
-            </div>
-          </article>
-        </section>
+        }
+        @if (selectedPage === 'payment-summary') {
         <section id="payment-summary" class="applications-panel">
           <div class="panel-header">
             <div>
@@ -241,6 +331,8 @@
             }
           }
         </section>
+        }
+        @if (selectedPage === 'notifications') {
         <section id="notifications" class="applications-panel" aria-label="Employee notifications">
           <div class="panel-header">
             <div>
@@ -248,11 +340,14 @@
               <p>Current application and payment alerts. Updated when you refresh.</p>
             </div>
           </div>
-          @if (loading || paymentsLoading) {
+          @if (loading) {
             <p role="status">Loading notifications...</p>
           } @else if (errorMessage) {
             <p>Notifications unavailable. Refresh to try again.</p>
           } @else {
+            @if (paymentsLoading) {
+              <p role="status">Loading payment alerts...</p>
+            }
             <ul class="notification-list">
               @for (notification of notifications; track notification.message) {
                 <li>
@@ -266,11 +361,15 @@
                   >
                 </li>
               } @empty {
+                @if (!paymentsLoading) {
                 <li>No items need attention.</li>
+                }
               }
             </ul>
           }
         </section>
+        }
+        @if (selectedPage === 'applications') {
         <section id="applications" class="applications-panel">
           <div class="panel-header">
             <div>
@@ -352,6 +451,12 @@
             </table>
           </div>
         </section>
+        }
+        @if (selectedPage === 'payments') {
+          <section class="applications-panel" aria-label="Payment management">
+            <router-outlet />
+          </section>
+        }
       </main>
     </div>
   </div>

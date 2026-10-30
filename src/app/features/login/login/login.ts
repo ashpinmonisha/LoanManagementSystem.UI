@@ -1,16 +1,16 @@
 import { ChangeDetectorRef, Component, inject } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { LoginService } from './login.service';
 import { EmployeeLoginRequest } from '../../../core/models/loan.model';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, RouterLink],
   templateUrl: './login.html',
-  styleUrl: './login.css'
+  styleUrl: './login.css',
 })
 export class LoginComponent {
   private readonly loginService = inject(LoginService);
@@ -33,18 +33,18 @@ export class LoginComponent {
 
     const request: EmployeeLoginRequest = {
       employeeCode: this.employeeCode.trim(),
-      password: this.password
+      password: this.password,
     };
 
     this.loading = true;
 
     this.loginService.login(request).subscribe({
-      next: response => {
+      next: (response) => {
         this.loading = false;
 
-        if (response.employee.role?.toLowerCase() !== 'employee') {
+        if (!this.loginService.isAllowedRole(response.employee.role)) {
           this.loginService.logout();
-          this.errorMessage = 'This account does not have the Employee role.';
+          this.errorMessage = 'Your account does not have access.';
           this.cdr.markForCheck();
           return;
         }
@@ -62,7 +62,7 @@ export class LoginComponent {
               : 'Login failed. Please try again.';
 
         this.cdr.markForCheck();
-      }
+      },
     });
   }
 }

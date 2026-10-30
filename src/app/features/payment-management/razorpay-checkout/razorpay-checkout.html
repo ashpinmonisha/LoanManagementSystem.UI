@@ -1,177 +1,173 @@
-<div class="razorpay-page">
-
-  <div class="checkout-header">
-    <span>LOANSPHERE • PAYMENT MANAGEMENT</span>
-    <h1>Secure EMI Payment</h1>
-    <p>Pay and confirm your loan payment</p>
+<section class="checkout">
+  <div class="checkout-heading">
+    <div>
+      <span class="eyebrow">SECURE CHECKOUT</span>
+      <h2>Review and pay</h2>
+      <p>Your payment is processed securely by Razorpay.</p>
+    </div>
+    <span class="gateway-badge"><span aria-hidden="true">⌑</span> Razorpay</span>
   </div>
 
   <div class="checkout-grid">
-
-    <!-- PAYMENT FORM -->
-    <div class="checkout-card">
-
-      <h2>Make Payment</h2>
+    <section class="checkout-card payment-card" aria-labelledby="payment-details-title">
+      <div class="card-heading">
+        <span class="step-number">02</span>
+        <div>
+          <h3 id="payment-details-title">Payment details</h3>
+          <p>Confirm the loan details before continuing.</p>
+        </div>
+      </div>
 
       <form #form="ngForm" (ngSubmit)="payNow()">
+        @if (!customerPortal) {
+          <div class="field">
+            <label for="checkoutCustomerId">Customer ID</label>
+            <input
+              id="checkoutCustomerId"
+              type="number"
+              name="customerId"
+              [(ngModel)]="payment.customerId"
+              min="1"
+              required
+            />
+          </div>
+        }
 
-        <label>Customer ID</label>
-        <input
-          type="number"
-          name="customerId"
-          [(ngModel)]="payment.customerId"
-          min="1"
-          required>
+        <div class="field">
+          <label for="checkoutLoanId">Loan ID</label>
+          <input
+            id="checkoutLoanId"
+            type="number"
+            name="loanId"
+            [(ngModel)]="payment.loanId"
+            min="1"
+            required
+            [readonly]="customerPortal"
+          />
+        </div>
 
-        <label>Loan ID</label>
-        <input
-          type="number"
-          name="loanId"
-          [(ngModel)]="payment.loanId"
-          min="1"
-          required>
+        <div class="field">
+          <label for="checkoutEmiId">EMI ID</label>
+          <input
+            id="checkoutEmiId"
+            type="number"
+            name="emiId"
+            [(ngModel)]="payment.emiId"
+            min="1"
+            required
+            [readonly]="customerPortal"
+          />
+        </div>
 
-        <label>EMI ID</label>
-        <input
-          type="number"
-          name="emiId"
-          [(ngModel)]="payment.emiId"
-          min="1"
-          required>
-
-        <label>Amount (₹)</label>
-        <input
-          type="number"
-          name="amount"
-          [(ngModel)]="payment.amount"
-          min="1"
-          step="0.01"
-          required>
+        <div class="field">
+          <label for="checkoutAmount">Amount</label>
+          <div class="amount-input">
+            <span aria-hidden="true">₹</span>
+            <input
+              id="checkoutAmount"
+              type="number"
+              name="amount"
+              [(ngModel)]="payment.amount"
+              min="1"
+              step="0.01"
+              required
+              [readonly]="customerPortal"
+            />
+          </div>
+        </div>
 
         <button
           class="checkout-button"
           type="submit"
-          [disabled]="loading || form.invalid">
-          {{ loading ? 'Processing...' : '₹ Pay Now' }}
+          [disabled]="loading || form.invalid || (customerPortal && (!payment.customerId || !payment.loanId || !payment.emiId || payment.amount < 1))"
+        >
+          <span>{{ loading ? 'Processing payment…' : 'Continue to secure payment' }}</span>
+          @if (!loading) {
+            <span aria-hidden="true">→</span>
+          }
         </button>
-
       </form>
 
-      <div *ngIf="error" class="error-message">
-        {{ error }}
+      @if (error) {
+        <p class="feedback error-message" role="alert">{{ error }}</p>
+      }
+
+      @if (message) {
+        <p class="feedback success-message" role="status">{{ message }}</p>
+      }
+
+      <p class="checkout-note"><span aria-hidden="true">🔒</span> Your payment details are encrypted and secure.</p>
+    </section>
+
+    <aside class="checkout-card summary-card" aria-label="Payment summary">
+      <span class="eyebrow">PAYMENT SUMMARY</span>
+      <h3>EMI payment</h3>
+      <div class="summary-lines">
+        <div class="summary-line">
+          <span>Customer</span>
+          <strong>{{ payment.customerId || '—' }}</strong>
+        </div>
+        <div class="summary-line">
+          <span>Loan</span>
+          <strong>#{{ payment.loanId || '—' }}</strong>
+        </div>
+        <div class="summary-line">
+          <span>EMI</span>
+          <strong>#{{ payment.emiId || '—' }}</strong>
+        </div>
       </div>
-
-      <div *ngIf="message" class="success-message">
-        {{ message }}
+      <div class="summary-total">
+        <span>Total to pay</span>
+        <strong>{{ payment.amount | currency: 'INR' }}</strong>
       </div>
-
-    </div>
-
-    <!-- PAYMENT SUMMARY -->
-    <div class="checkout-card summary-card">
-
-      <div class="rupee-icon">₹</div>
-
-      <h2>Payment Summary</h2>
-
-      <div class="summary-line">
-        <span>Customer</span>
-        <strong>{{ payment.customerId || '—' }}</strong>
+      <div class="gateway-note">
+        <span class="gateway-mark" aria-hidden="true">R</span>
+        <span><strong>Powered by Razorpay</strong><small>UPI · Cards · Net banking</small></span>
       </div>
-
-      <div class="summary-line">
-        <span>Loan</span>
-        <strong>{{ payment.loanId || '—' }}</strong>
-      </div>
-
-      <div class="summary-line">
-        <span>EMI</span>
-        <strong>{{ payment.emiId || '—' }}</strong>
-      </div>
-
-      <hr>
-
-      <p>Total Amount</p>
-
-      <h1>{{ payment.amount | currency:'INR' }}</h1>
-
-      <div class="test-mode">
-        RAZORPAY TEST MODE
-      </div>
-
-    </div>
-
+    </aside>
   </div>
 
-  <!-- VERIFIED PAYMENT CONFIRMATION -->
-  <div *ngIf="confirmation as receipt"
-       class="confirmation-card">
+  @if (confirmation; as receipt) {
+    <section class="confirmation-card" aria-labelledby="confirmation-title">
+      <div class="confirmation-icon" aria-hidden="true">✓</div>
+      <span class="eyebrow">PAYMENT COMPLETE</span>
+      <h2 id="confirmation-title">Payment confirmed</h2>
+      <p>Your payment has been verified and recorded successfully.</p>
 
-    <div class="confirmation-icon">
-      ✓
-    </div>
-
-    <h2>Payment Confirmed</h2>
-
-    <p>
-      Your payment has been verified and recorded.
-    </p>
-
-    <div class="confirmation-details">
-
-      <div>
-        <span>Payment ID</span>
-        <strong>{{ receipt.paymentId }}</strong>
-      </div>
-
-      <div>
-        <span>Customer ID</span>
-        <strong>{{ receipt.customerId }}</strong>
-      </div>
-
-      <div>
-        <span>Loan ID</span>
-        <strong>{{ receipt.loanId }}</strong>
-      </div>
-
-      <div>
-        <span>EMI ID</span>
-        <strong>{{ receipt.emiId }}</strong>
-      </div>
-
-      <div>
-        <span>Amount</span>
-        <strong>
-          {{ receipt.amount | currency:'INR' }}
-        </strong>
-      </div>
-
-      <div>
-        <span>Payment Method</span>
-        <strong>{{ receipt.paymentMethod }}</strong>
-      </div>
-
-      <div>
-        <span>Transaction Reference</span>
-        <strong>{{ receipt.paymentReference }}</strong>
-      </div>
-
-      <div>
-        <span>Status</span>
-        <strong class="completed">
-          {{ receipt.paymentStatus }}
-        </strong>
-      </div>
-
-      <div>
-        <span>Payment Date</span>
-        <strong>
-          {{ receipt.paymentDate | date:'medium' }}
-        </strong>
-      </div>
-
-    </div>
-
-  </div>
-
-</div>
+      <dl class="confirmation-details">
+        <div>
+          <dt>Payment ID</dt>
+          <dd>{{ receipt.paymentId }}</dd>
+        </div>
+        <div>
+          <dt>Customer ID</dt>
+          <dd>{{ receipt.customerId }}</dd>
+        </div>
+        <div>
+          <dt>Loan / EMI</dt>
+          <dd>#{{ receipt.loanId }} / #{{ receipt.emiId }}</dd>
+        </div>
+        <div>
+          <dt>Amount</dt>
+          <dd>{{ receipt.amount | currency: 'INR' }}</dd>
+        </div>
+        <div>
+          <dt>Payment method</dt>
+          <dd>{{ receipt.paymentMethod }}</dd>
+        </div>
+        <div>
+          <dt>Transaction reference</dt>
+          <dd>{{ receipt.paymentReference }}</dd>
+        </div>
+        <div>
+          <dt>Status</dt>
+          <dd><span class="completed">{{ receipt.paymentStatus }}</span></dd>
+        </div>
+        <div>
+          <dt>Payment date</dt>
+          <dd>{{ receipt.paymentDate | date: 'medium' }}</dd>
+        </div>
+      </dl>
+    </section>
+  }
+</section>

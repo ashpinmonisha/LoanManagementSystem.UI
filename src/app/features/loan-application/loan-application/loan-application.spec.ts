@@ -1,16 +1,26 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { LoanApplication } from './loan-application';
+import { provideRouter } from '@angular/router';
+import { of } from 'rxjs';
+import { LoanApplicationComponent } from './loan-application';
+import { LoanApplicationService } from './loan-application.service';
 
-describe('LoanApplication', () => {
-  let component: LoanApplication;
-  let fixture: ComponentFixture<LoanApplication>;
+describe('LoanApplicationComponent', () => {
+  let component: LoanApplicationComponent;
+  let fixture: ComponentFixture<LoanApplicationComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [LoanApplication],
+      imports: [LoanApplicationComponent],
+      providers: [
+        provideRouter([]),
+        {
+          provide: LoanApplicationService,
+          useValue: { createApplication: () => of({ loanId: 1, status: 'Pending' }) },
+        },
+      ],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(LoanApplication);
+    fixture = TestBed.createComponent(LoanApplicationComponent);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

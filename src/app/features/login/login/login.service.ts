@@ -17,6 +17,7 @@ export class LoginService {
 
   private readonly apiUrl = API_BASE_URL + '/Employee';
   private readonly storageKey = 'employee';
+  private readonly allowedRoles = new Set(['admin', 'manager', 'employee']);
 
   // sessionStorage does not exist on the server when SSR is on
   private get storage(): Storage | null {
@@ -78,5 +79,9 @@ export class LoginService {
 
   isEmployee(): boolean {
     return this.getEmployee()?.role?.toLowerCase() === 'employee';
+  }
+
+  isAllowedRole(role: string | null | undefined): boolean {
+    return this.allowedRoles.has(role?.trim().toLowerCase() ?? '');
   }
 }

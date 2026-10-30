@@ -1,8 +1,8 @@
 import { ChangeDetectorRef, Component, DestroyRef, inject, OnInit } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { catchError, forkJoin, map, of, Subscription } from 'rxjs';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { catchError, forkJoin, map, of, Subscription, filter } from 'rxjs';
 import { CommonModule } from '@angular/common';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
 import { LoanApplication } from '../../core/models/loan.model';
 import { LoginService } from '../login/login/login.service';
 import { LoanApplicationService } from '../loan-application/loan-application/loan-application.service';
@@ -11,7 +11,7 @@ import { OutstandingBalance, PaymentHistory, PaymentService } from '../../core/s
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, RouterOutlet],
   templateUrl: './dashboard.html',
   styleUrls: [
     './Dashboard.css',
@@ -19,9 +19,36 @@ import { OutstandingBalance, PaymentHistory, PaymentService } from '../../core/s
     './dashboard-responsive.css',
     './dashboard-employee.css',
     './dashboard-growth.css',
+    './dashboard-workspace.css',
+    './dashboard-workspace-panels.css',
+    './employee-dashboard-overview.css',
   ],
 })
 export class DashboardComponent implements OnInit {
+  private readonly navigation = toSignal(inject(Router).events.pipe(filter(event => event instanceof NavigationEnd)));
+  private readonly fragment = toSignal(inject(ActivatedRoute).fragment);
+
+  get selectedPage(): string {
+    this.navigation();
+    if (this.router.url.split(/[?#]/)[0].startsWith('/dashboard/payments')) return 'payments';
+    const fragment = this.fragment();
+    if (fragment?.startsWith('loan-')) return 'applications';
+    return ['growth', 'applications', 'payment-summary', 'notifications'].includes(fragment ?? '')
+      ? fragment!
+      : 'overview';
+  }
+
+  get pageTitle(): string {
+    switch (this.selectedPage) {
+      case 'payments': return 'Payments';
+      case 'growth': return 'Growth overview';
+      case 'applications': return 'Review applications';
+      case 'payment-summary': return 'Payment summary';
+      case 'notifications': return 'Notifications';
+      default: return 'Welcome, ' + (this.employee?.employeeName || 'Employee') + '!';
+    }
+  }
+
   private readonly loans = inject(LoanApplicationService);
   private readonly loginService = inject(LoginService);
   private readonly router = inject(Router);
@@ -99,8 +126,8 @@ export class DashboardComponent implements OnInit {
     return Math.max(1, ...this.growthData.flatMap((month) => [month.incoming, month.outgoing]));
   }
 
-  get isEmployee(): boolean {
-    return this.loginService.isEmployee();
+  get hasDashboardAccess(): boolean {
+    return this.loginService.isAllowedRole(this.employee?.role);
   }
 
   get totalPaid(): number {
@@ -112,6 +139,95 @@ export class DashboardComponent implements OnInit {
       (sum, item) => sum + (item.balance?.totalOutstanding ?? 0),
       0,
     );
+  }
+
+  get activeLoanCount(): number {
+    return this.applications.filter((loan) =>
+      ['approved', 'disbursed', 'active'].includes(loan.status.trim().toLowerCase()),
+    ).length;
+  }
+
+  get customerCount(): number {
+    return new Set(this.applications.map((loan) => loan.customerId)).size;
+  }
+
+  get overdueLoanCount(): number {
+    return Object.values(this.paymentSummary).filter(
+      (item) => (item.balance?.overdueAmount ?? 0) > 0,
+    ).length;
+  }
+
+  get overdueAmount(): number {
+    return Object.values(this.paymentSummary).reduce(
+      (sum, item) => sum + (item.balance?.overdueAmount ?? 0),
+      0,
+    );
+  }
+
+  get todayCollections(): number {
+    const today = this.reportingDateKey(new Date().toISOString());
+    return this.paymentHistory
+      .filter(
+        (payment) =>
+          this.reportingDateKey(payment.paymentDate) === today &&
+          ['success', 'successful', 'completed', 'paid'].includes(
+            (payment.paymentStatus ?? '').trim().toLowerCase(),
+          ),
+      )
+      .reduce((sum, payment) => sum + payment.amount, 0);
+  }
+
+  get todayPaymentCount(): number {
+    const today = this.reportingDateKey(new Date().toISOString());
+    return this.paymentHistory.filter(
+      (payment) =>
+        this.reportingDateKey(payment.paymentDate) === today &&
+        ['success', 'successful', 'completed', 'paid'].includes(
+          (payment.paymentStatus ?? '').trim().toLowerCase(),
+        ),
+    ).length;
+  }
+
+  get approvalQueue(): LoanApplication[] {
+    return this.filteredApplications
+      .filter((loan) => loan.status.trim().toLowerCase() === 'pending')
+      .slice(0, 5);
+  }
+
+  get recentPayments(): PaymentHistory[] {
+    const query = this.searchTerm.trim().toLowerCase();
+    return this.paymentHistory
+      .filter((payment) =>
+        [
+          payment.customerId,
+          payment.loanId,
+          payment.paymentReference,
+          payment.paymentStatus,
+          payment.paymentMethod,
+        ].some((value) => String(value ?? '').toLowerCase().includes(query)),
+      )
+      .slice()
+      .sort((a, b) => (Date.parse(b.paymentDate) || 0) - (Date.parse(a.paymentDate) || 0))
+      .slice(0, 5);
+  }
+
+  get collectionChartScale(): number {
+    return Math.max(1, ...this.growthData.map((month) => month.incoming));
+  }
+
+  collectionHeight(amount: number): number {
+    return amount > 0 ? Math.max(8, (amount / this.collectionChartScale) * 100) : 0;
+  }
+
+  paymentDateLabel(value: string): string {
+    const date = new Date(value);
+    if (!Number.isFinite(date.getTime())) return '—';
+    return new Intl.DateTimeFormat('en-IN', {
+      timeZone: 'Asia/Kolkata',
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    }).format(date);
   }
 
   get paymentDataIncomplete(): boolean {
@@ -185,6 +301,17 @@ export class DashboardComponent implements OnInit {
       .reduce((sum, payment) => sum + payment.amount, 0);
   }
 
+  private reportingDateKey(value: string): string {
+    const date = new Date(value);
+    if (!Number.isFinite(date.getTime())) return '';
+    return new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'Asia/Kolkata',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    }).format(date);
+  }
+
   employee = this.loginService.getEmployee();
   applications: LoanApplication[] = [];
   loading = true;
@@ -192,7 +319,7 @@ export class DashboardComponent implements OnInit {
   searchTerm = '';
 
   ngOnInit(): void {
-    if (this.isEmployee) this.loadApplications();
+    if (this.hasDashboardAccess) this.loadApplications();
   }
 
   get filteredApplications(): LoanApplication[] {
@@ -205,7 +332,7 @@ export class DashboardComponent implements OnInit {
   }
 
   loadApplications(): void {
-    if (!this.isEmployee) return;
+    if (!this.hasDashboardAccess) return;
     this.applicationSubscription?.unsubscribe();
     this.paymentSubscription?.unsubscribe();
     this.paymentSummary = {};

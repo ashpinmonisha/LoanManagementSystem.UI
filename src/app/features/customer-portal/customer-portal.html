@@ -1,0 +1,692 @@
+<div id="customer-portal" class="portal">
+  <header class="topbar">
+    <a class="brand" href="/customer"><span class="brand-mark" aria-hidden="true">◆</span><span class="brand-copy">LoanSphere<small>Loan Management System</small></span></a>
+    <form class="top-search" (ngSubmit)="loadDashboardLoan()">
+      <span aria-hidden="true">⌕</span>
+      <input
+        type="number"
+        name="quickLoanId"
+        min="1"
+        placeholder="Search your loan ID to see payments"
+        aria-label="Search loan ID"
+        [(ngModel)]="dashboardLoanId"
+      />
+      <button type="submit" [disabled]="dashboardLoading">View</button>
+    </form>
+    <div class="account">
+      <div class="avatar">{{ customer?.fullName?.charAt(0) || 'C' }}</div>
+      <div>
+        <strong>{{ customer?.fullName }}</strong
+        ><small>Customer account</small>
+      </div>
+      <button type="button" class="text-button" (click)="logout()">Sign out</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <span class="sidebar-label">CUSTOMER MENU</span>
+      <button type="button" [class.active]="section === 'dashboard'" (click)="section = 'dashboard'">
+        <span aria-hidden="true">⌂</span>Dashboard
+      </button>
+      <button type="button" [class.active]="section === 'loans'" (click)="section = 'loans'">
+        <span aria-hidden="true">▤</span>My loans
+      </button>
+      <button
+        type="button"
+        [class.active]="section === 'schedule'"
+        (click)="section = 'schedule'"
+      >
+        <span aria-hidden="true">▦</span>EMI schedule
+      </button>
+      <button
+        type="button"
+        [class.active]="section === 'payments'"
+        (click)="section = 'payments'"
+      >
+        <span aria-hidden="true">▣</span>Payments
+      </button>
+      <button type="button" [class.active]="section === 'profile'" (click)="section = 'profile'">
+        <span aria-hidden="true">♙</span>Profile
+      </button>
+      <button type="button" [class.active]="section === 'kyc'" (click)="section = 'kyc'">
+        <span aria-hidden="true">▧</span>KYC documents
+      </button>
+      <button
+        type="button"
+        [class.active]="section === 'eligibility'"
+        (click)="section = 'eligibility'"
+      >
+        <span aria-hidden="true">◉</span>Eligibility profile
+      </button>
+      <div class="sidebar-note">
+        <div class="help-icon" aria-hidden="true">✓</div>
+        <strong>Secure loan journey</strong>
+        <p>Your loan and payment information is available after you sign in.</p>
+      </div>
+    </aside>
+
+    <main class="content">
+      @if (section === 'dashboard' || section === 'loans') {
+        <section class="dashboard-welcome">
+          <div>
+            <span class="eyebrow">{{ section === 'dashboard' ? 'CUSTOMER DASHBOARD' : 'YOUR LOAN ACCOUNT' }}</span>
+            <h1>Welcome back, {{ customer?.fullName || 'Customer' }}!</h1>
+            <p>Here’s an overview of your loan account and payment status.</p>
+          </div>
+          <div class="welcome-date">
+            <strong>{{ today | date: 'EEE, d MMM y' }}</strong>
+            <span>Manage your loan securely</span>
+          </div>
+        </section>
+
+        <form class="loan-lookup-card" (ngSubmit)="loadDashboardLoan()">
+          <div>
+            <span class="step-badge">01</span>
+            <div>
+              <strong>Load your loan dashboard</strong>
+              <p>Enter the loan ID from your loan approval to view your live balance and EMI schedule.</p>
+            </div>
+          </div>
+          <label class="loan-id-field">
+            <span class="visually-hidden">Loan ID</span>
+            <input
+              type="number"
+              name="dashboardLoanId"
+              min="1"
+              placeholder="Loan ID"
+              [(ngModel)]="dashboardLoanId"
+              required
+            />
+          </label>
+          <button type="submit" [disabled]="dashboardLoading">
+            {{ dashboardLoading ? 'Loading…' : 'Load loan' }} <span aria-hidden="true">→</span>
+          </button>
+        </form>
+
+        @if (dashboardError) {
+          <p class="notice error" role="alert">{{ dashboardError }}</p>
+        }
+
+        @if (dashboardLoading) {
+          <p class="status-message" role="status">Loading your loan balance and payments…</p>
+        } @else if (dashboardOutstanding; as balance) {
+          <section class="dashboard-metrics" aria-label="Loan payment summary">
+            <article class="dashboard-metric loan-total">
+              <span class="metric-icon" aria-hidden="true">▤</span>
+              <div><span>Total scheduled EMIs</span><strong>{{ balance.totalEmiAmount | currency: 'INR' }}</strong><small>Loan #{{ dashboardLoanId }}</small></div>
+            </article>
+            <article class="dashboard-metric loan-balance">
+              <span class="metric-icon" aria-hidden="true">₹</span>
+              <div><span>Outstanding balance</span><strong>{{ balance.totalOutstanding | currency: 'INR' }}</strong><small>{{ balance.totalEmiAmount > 0 ? (remainingPercent | percent: '1.0-0') + ' remaining' : 'No outstanding EMIs' }}</small></div>
+            </article>
+            <article class="dashboard-metric next-due">
+              <span class="metric-icon" aria-hidden="true">▦</span>
+              <div><span>Next EMI due</span><strong>{{ nextEmi ? (nextEmi.remainingAmount | currency: 'INR') : '—' }}</strong><small>{{ nextEmi ? ('Due ' + (nextEmi.dueDate | date: 'd MMM y')) : 'No due payments' }}</small></div>
+              @if (nextEmi) { <button type="button" class="metric-arrow" aria-label="Make payment" (click)="openPayments()">›</button> }
+            </article>
+            <article class="dashboard-metric payment-state">
+              <span class="metric-icon" aria-hidden="true">{{ balance.overdueAmount > 0 ? '!' : '✓' }}</span>
+              <div><span>Payment status</span><strong>{{ dashboardPaymentStatus }}</strong><small>{{ balance.overdueAmount > 0 ? (balance.overdueAmount | currency: 'INR') + ' overdue' : (nextEmi ? 'Next payment is scheduled' : 'No due payments') }}</small></div>
+            </article>
+          </section>
+
+          <div class="dashboard-panels">
+            <section class="dashboard-card progress-card">
+              <header class="card-title">
+                <div><h2>Loan repayment progress</h2><p>Your repayment journey</p></div>
+                <button type="button" class="link-button" (click)="section = 'loans'">Loan details <span aria-hidden="true">→</span></button>
+              </header>
+              <div class="progress-content">
+                <div class="progress-ring" [style.--progress]="repaymentPercent + '%'">
+                  <div><strong>{{ repaymentPercent | number: '1.0-0' }}%</strong><span>Repaid</span></div>
+                </div>
+                <div class="progress-legend">
+                  <div><span class="legend-dot repaid"></span><span>Amount repaid</span><strong>{{ balance.totalPaid | currency: 'INR' }}</strong></div>
+                  <div><span class="legend-dot remaining"></span><span>Outstanding balance</span><strong>{{ balance.totalOutstanding | currency: 'INR' }}</strong></div>
+                  <div><span class="legend-dot total"></span><span>Total scheduled EMIs</span><strong>{{ balance.totalEmiAmount | currency: 'INR' }}</strong></div>
+                </div>
+              </div>
+            </section>
+
+            <section class="dashboard-card schedule-card">
+              <header class="card-title">
+                <div><h2>Upcoming EMI schedule</h2><p>Due dates and remaining amounts</p></div>
+                <button type="button" class="link-button" (click)="section = 'schedule'">View all <span aria-hidden="true">→</span></button>
+              </header>
+              @if (dashboardEmis.length) {
+                <div class="compact-table">
+                  <table>
+                    <thead><tr><th>EMI</th><th>Due date</th><th>Amount</th><th>Status</th></tr></thead>
+                    <tbody>
+                      @for (emi of dashboardEmis.slice(0, 5); track emi.emiId) {
+                        <tr><td>#{{ emi.emiId }}</td><td>{{ emi.dueDate | date: 'd MMM y' }}</td><td>{{ emi.remainingAmount | currency: 'INR' }}</td><td><span class="emi-status" [class.paid]="emi.remainingAmount <= 0 || ['paid', 'completed'].includes(emi.status.toLowerCase())">{{ emi.remainingAmount <= 0 || ['paid', 'completed'].includes(emi.status.toLowerCase()) ? 'Paid' : emi.status }}</span></td></tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              } @else {
+                <p class="empty-state">No EMI schedule was returned for this loan.</p>
+              }
+            </section>
+
+            <section class="dashboard-card recent-card">
+              <header class="card-title">
+                <div><h2>Recent payments</h2><p>Latest transactions for this loan</p></div>
+                <button type="button" class="link-button" (click)="section = 'payments'">Payment history <span aria-hidden="true">→</span></button>
+              </header>
+              @if (dashboardHistoryError) {
+                <p class="notice error" role="alert">{{ dashboardHistoryError }}</p>
+              } @else if (recentPayments.length) {
+                <div class="compact-table">
+                  <table>
+                    <thead><tr><th>Date</th><th>Method</th><th>Amount</th><th>Reference</th><th>Status</th></tr></thead>
+                    <tbody>
+                      @for (payment of recentPayments; track payment.paymentId) {
+                        <tr><td>{{ payment.paymentDate | date: 'd MMM y' }}</td><td>{{ payment.paymentMethod }}</td><td>{{ payment.amount | currency: 'INR' }}</td><td class="truncate">{{ payment.paymentReference }}</td><td><span class="emi-status paid">{{ payment.paymentStatus }}</span></td></tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              } @else {
+                <p class="empty-state">No payments have been recorded for this loan yet.</p>
+              }
+            </section>
+
+            <section class="dashboard-card quick-actions">
+              <header class="card-title"><div><h2>Quick actions</h2><p>Manage your loan</p></div></header>
+              <button type="button" class="quick-action primary" (click)="openPayments()" [disabled]="!nextEmi"><span aria-hidden="true">▣</span>Make payment<span aria-hidden="true">›</span></button>
+              <button type="button" class="quick-action" (click)="section = 'schedule'"><span aria-hidden="true">▦</span>View EMI schedule<span aria-hidden="true">›</span></button>
+              <button type="button" class="quick-action" (click)="section = 'payments'"><span aria-hidden="true">↻</span>Payment history<span aria-hidden="true">›</span></button>
+              <button type="button" class="quick-action" (click)="section = 'profile'"><span aria-hidden="true">♙</span>Update profile<span aria-hidden="true">›</span></button>
+            </section>
+          </div>
+        }
+      }
+
+      @if (section !== 'dashboard' && section !== 'loans') {
+        <section class="welcome">
+          <div>
+            <span class="eyebrow">CUSTOMER &amp; LOAN MANAGEMENT</span>
+            <h1>{{ section === 'payments' ? 'Payments' : section === 'schedule' ? 'EMI schedule' : section === 'profile' ? 'Your profile' : section === 'kyc' ? 'KYC documents' : 'Eligibility profile' }}</h1>
+            <p>Welcome back, {{ customer?.fullName || 'Customer' }}. Manage your loan account securely.</p>
+          </div>
+          <div class="customer-id">Customer ID <strong>#{{ customer?.customerId }}</strong></div>
+        </section>
+      }
+
+      @if (section === 'schedule') {
+        <section class="panel schedule-full">
+          <div class="panel-heading">
+            <div><span class="eyebrow">REPAYMENT PLAN</span><h2>EMI schedule</h2><p>Load your loan from the dashboard to see due dates and remaining payments.</p></div>
+            @if (dashboardOutstanding) { <span class="status verified">Loan #{{ dashboardLoanId }}</span> }
+          </div>
+          @if (!dashboardOutstanding) {
+            <p class="empty-state">No loan is loaded. Go to Dashboard and enter your loan ID.</p>
+          } @else if (dashboardEmis.length) {
+            <div class="table-scroll"><table><thead><tr><th>EMI</th><th>Due date</th><th>Scheduled amount</th><th>Paid</th><th>Remaining</th><th>Status</th></tr></thead><tbody>
+              @for (emi of dashboardEmis; track emi.emiId) {
+                <tr><td>#{{ emi.emiId }}</td><td>{{ emi.dueDate | date: 'mediumDate' }}</td><td>{{ emi.emiAmount | currency: 'INR' }}</td><td>{{ emi.amountPaid | currency: 'INR' }}</td><td>{{ emi.remainingAmount | currency: 'INR' }}</td><td><span class="status" [class.verified]="emi.remainingAmount <= 0 || ['paid', 'completed'].includes(emi.status.toLowerCase())">{{ emi.remainingAmount <= 0 || ['paid', 'completed'].includes(emi.status.toLowerCase()) ? 'Paid' : emi.status }}</span></td></tr>
+              }
+            </tbody></table></div>
+          } @else { <p class="empty-state">The backend did not return EMI schedule entries.</p> }
+        </section>
+      }
+
+      @if (section === 'loans') {
+        <section class="panel">
+          <div class="panel-heading"><div><span class="eyebrow">LOAN ACCOUNT</span><h2>My loan</h2><p>Your loan balance and repayments are loaded directly from the payment API.</p></div><button class="secondary-button" type="button" (click)="section = 'dashboard'">Back to dashboard</button></div>
+          @if (dashboardOutstanding) {
+            <div class="loan-detail-grid">
+              <div><span>Loan ID</span><strong>#{{ dashboardLoanId }}</strong></div>
+              <div><span>Total scheduled EMIs</span><strong>{{ dashboardOutstanding.totalEmiAmount | currency: 'INR' }}</strong></div>
+              <div><span>Paid</span><strong>{{ dashboardOutstanding.totalPaid | currency: 'INR' }}</strong></div>
+              <div><span>Outstanding</span><strong>{{ dashboardOutstanding.totalOutstanding | currency: 'INR' }}</strong></div>
+              <div><span>Overdue</span><strong>{{ dashboardOutstanding.overdueAmount | currency: 'INR' }}</strong></div>
+            </div>
+            <p class="disclaimer">Loan amount, term and interest details are not included in the currently connected customer payment API.</p>
+            <button type="button" class="primary-button" (click)="section = 'schedule'">View EMI schedule</button>
+          } @else {
+            <p class="empty-state">Load a loan from the Dashboard to see its live details.</p>
+          }
+        </section>
+      }
+
+      @if (section === 'profile') {
+        <section class="panel">
+          <div class="panel-heading">
+            <div>
+              <span class="eyebrow">ACCOUNT DETAILS</span>
+              <h2>Your profile</h2>
+            </div>
+            @if (profile) {
+              <span class="status verified">Account active</span>
+            }
+          </div>
+          @if (profileLoading) {
+            <p class="status-message" role="status">Loading your profile…</p>
+          } @else {
+            @if (profileError) {
+              <p class="notice error" role="alert">{{ profileError }}</p>
+            }
+            @if (profileSuccess) {
+              <p class="notice success" role="status">{{ profileSuccess }}</p>
+            }
+            <form #profileForm="ngForm" (ngSubmit)="saveProfile()">
+              <div class="form-grid">
+                <div class="field">
+                  <label for="fullName">Full name</label
+                  ><input
+                    id="fullName"
+                    name="fullName"
+                    [(ngModel)]="fullName"
+                    minlength="3"
+                    maxlength="100"
+                    required
+                  />
+                </div>
+                <div class="field">
+                  <label for="email">Email address</label
+                  ><input
+                    id="email"
+                    name="email"
+                    [value]="profile?.email ?? customer?.email"
+                    disabled
+                  />
+                </div>
+                <div class="field">
+                  <label for="phoneNumber">Phone number</label
+                  ><input
+                    id="phoneNumber"
+                    name="phoneNumber"
+                    type="tel"
+                    [(ngModel)]="phoneNumber"
+                    minlength="7"
+                    maxlength="20"
+                    required
+                  />
+                </div>
+                <div class="field">
+                  <label for="profileDob">Date of birth</label
+                  ><input
+                    id="profileDob"
+                    name="dateOfBirth"
+                    type="date"
+                    [(ngModel)]="dateOfBirth"
+                    [max]="today"
+                  />
+                </div>
+                <div class="field">
+                  <label for="profileGender">Gender</label
+                  ><select id="profileGender" name="gender" [(ngModel)]="gender">
+                    <option value="">Prefer not to say</option>
+                    <option value="Female">Female</option>
+                    <option value="Male">Male</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+              </div>
+              <button
+                class="primary-button"
+                type="submit"
+                [disabled]="profileSaving || !profileForm.valid"
+              >
+                {{ profileSaving ? 'Saving…' : 'Save profile' }}
+              </button>
+            </form>
+          }
+        </section>
+      }
+
+      @if (section === 'payments') {
+        <app-customer-payments
+          [customerId]="customer?.customerId ?? 0"
+          [initialLoanId]="dashboardLoanId"
+          (paymentUpdated)="loadDashboardLoan()"
+        />
+      }
+
+      @if (section === 'kyc') {
+        <section class="panel">
+          <div class="panel-heading">
+            <div>
+              <span class="eyebrow">IDENTITY VERIFICATION</span>
+              <h2>KYC documents</h2>
+              <p>Upload a clear identity document for verification.</p>
+            </div>
+          </div>
+          @if (kycError) {
+            <p class="notice error" role="alert">{{ kycError }}</p>
+          }
+          @if (kycSuccess) {
+            <p class="notice success" role="status">{{ kycSuccess }}</p>
+          }
+          <form #kycForm="ngForm" (ngSubmit)="uploadDocument()">
+            <div class="form-grid">
+              <div class="field">
+                <label for="documentType">Document type</label
+                ><select id="documentType" name="documentType" [(ngModel)]="documentType" required>
+                  <option value="">Select document</option>
+                  <option value="Aadhaar">Aadhaar</option>
+                  <option value="PAN">PAN</option>
+                  <option value="Passport">Passport</option>
+                  <option value="Driving Licence">Driving licence</option>
+                  <option value="Voter ID">Voter ID</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="documentNumber">Document number</label
+                ><input
+                  id="documentNumber"
+                  name="documentNumber"
+                  [(ngModel)]="documentNumber"
+                  maxlength="100"
+                  required
+                />
+              </div>
+              <div class="field">
+                <label for="expiryDate"
+                  >Expiry date <span class="muted">(if applicable)</span></label
+                ><input
+                  id="expiryDate"
+                  name="expiryDate"
+                  type="date"
+                  [(ngModel)]="expiryDate"
+                  [min]="tomorrow"
+                />
+              </div>
+              <div class="field">
+                <label for="documentFile">Document file</label
+                ><input
+                  id="documentFile"
+                  name="documentFile"
+                  type="file"
+                  accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
+                  (change)="selectFile($event)"
+                  required
+                /><small>PDF, JPG or PNG · up to 5 MB</small>
+              </div>
+            </div>
+            <button
+              class="primary-button"
+              type="submit"
+              [disabled]="uploadLoading || !kycForm.valid || !selectedFile"
+            >
+              {{ uploadLoading ? 'Uploading…' : 'Submit document for verification' }}
+            </button>
+          </form>
+        </section>
+
+        <section class="panel">
+          <div class="panel-heading">
+            <div>
+              <span class="eyebrow">DOCUMENT TRACKER</span>
+              <h2>Submitted documents</h2>
+            </div>
+            <button
+              class="secondary-button"
+              type="button"
+              (click)="loadDocuments()"
+              [disabled]="documentsLoading"
+            >
+              Refresh
+            </button>
+          </div>
+          @if (documentsLoading) {
+            <p class="status-message" role="status">Loading documents…</p>
+          } @else if (documents.length) {
+            <div class="table-scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Document</th>
+                    <th>Submitted</th>
+                    <th>Expires</th>
+                    <th>Status</th>
+                    <th>Remarks</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (document of documents; track document.kycDocumentId) {
+                    <tr>
+                      <td>{{ document.documentType }}</td>
+                      <td>{{ document.uploadedAt | date: 'mediumDate' }}</td>
+                      <td>
+                        {{ document.expiryDate ? (document.expiryDate | date: 'mediumDate') : '—' }}
+                      </td>
+                      <td>
+                        <span
+                          class="status"
+                          [class.verified]="
+                            document.verificationStatus.toLowerCase() === 'verified'
+                          "
+                          [class.rejected]="
+                            document.verificationStatus.toLowerCase() === 'rejected'
+                          "
+                          >{{ document.verificationStatus }}</span
+                        >
+                      </td>
+                      <td>{{ document.remarks || '—' }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          } @else {
+            <p class="empty-state">
+              No documents submitted yet. Upload a document above to begin KYC verification.
+            </p>
+          }
+        </section>
+      }
+
+      @if (section === 'eligibility') {
+        <section class="panel">
+          <div class="panel-heading">
+            <div>
+              <span class="eyebrow">FINANCIAL PROFILE</span>
+              <h2>Customer eligibility</h2>
+              <p>Share your employment and financial information for a basic eligibility check.</p>
+            </div>
+          </div>
+          @if (eligibilityError) {
+            <p class="notice error" role="alert">{{ eligibilityError }}</p>
+          }
+          @if (eligibilitySuccess) {
+            <p class="notice success" role="status">{{ eligibilitySuccess }}</p>
+          }
+          @if (eligibilityLoading) {
+            <p class="status-message" role="status">Loading your eligibility profile…</p>
+          } @else {
+            <form #eligibilityForm="ngForm" (ngSubmit)="saveEligibility()">
+              <div class="form-grid">
+                <div class="field">
+                  <label for="monthlyIncome">Monthly income (₹)</label
+                  ><input
+                    id="monthlyIncome"
+                    name="monthlyIncome"
+                    type="number"
+                    min="1"
+                    max="100000000"
+                    step="0.01"
+                    [(ngModel)]="eligibility.monthlyIncome"
+                    required
+                  />
+                </div>
+                <div class="field">
+                  <label for="employmentType">Employment type</label
+                  ><select
+                    id="employmentType"
+                    name="employmentType"
+                    [(ngModel)]="eligibility.employmentType"
+                    required
+                  >
+                    <option value="">Select type</option>
+                    <option value="Salaried">Salaried</option>
+                    <option value="Self-employed">Self-employed</option>
+                    <option value="Business">Business</option>
+                    <option value="Retired">Retired</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="employmentStatus">Employment status</label
+                  ><select
+                    id="employmentStatus"
+                    name="employmentStatus"
+                    [(ngModel)]="eligibility.employmentStatus"
+                    required
+                  >
+                    <option value="">Select status</option>
+                    <option value="Employed">Employed</option>
+                    <option value="Self-employed">Self-employed</option>
+                    <option value="Unemployed">Unemployed</option>
+                    <option value="Retired">Retired</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="employerName"
+                    >Employer name <span class="muted">(optional)</span></label
+                  ><input
+                    id="employerName"
+                    name="employerName"
+                    [(ngModel)]="eligibility.employerName"
+                    maxlength="150"
+                  />
+                </div>
+                <div class="field">
+                  <label for="experience">Employment experience (years)</label
+                  ><input
+                    id="experience"
+                    name="employmentExperienceYears"
+                    type="number"
+                    min="0"
+                    max="100"
+                    step="1"
+                    [(ngModel)]="eligibility.employmentExperienceYears"
+                    required
+                  />
+                </div>
+                <div class="field">
+                  <label for="creditScore">Credit score</label
+                  ><input
+                    id="creditScore"
+                    name="creditScore"
+                    type="number"
+                    min="0"
+                    max="850"
+                    step="1"
+                    [(ngModel)]="eligibility.creditScore"
+                    required
+                  />
+                </div>
+                <div class="field">
+                  <label for="existingLoanCount">Existing loans</label
+                  ><input
+                    id="existingLoanCount"
+                    name="existingLoanCount"
+                    type="number"
+                    min="0"
+                    max="50"
+                    step="1"
+                    [(ngModel)]="eligibility.existingLoanCount"
+                    required
+                  />
+                </div>
+                <div class="field">
+                  <label for="existingLoanAmount">Existing loan amount (₹)</label
+                  ><input
+                    id="existingLoanAmount"
+                    name="existingLoanAmount"
+                    type="number"
+                    min="0"
+                    max="100000000"
+                    step="0.01"
+                    [(ngModel)]="eligibility.existingLoanAmount"
+                    required
+                  />
+                </div>
+                <div class="field">
+                  <label for="monthlyObligations">Monthly loan obligations (₹)</label
+                  ><input
+                    id="monthlyObligations"
+                    name="existingMonthlyObligations"
+                    type="number"
+                    min="0"
+                    max="100000000"
+                    step="0.01"
+                    [(ngModel)]="eligibility.existingMonthlyObligations"
+                    required
+                  />
+                </div>
+                <div class="field full">
+                  <label for="remarks"
+                    >Additional financial notes <span class="muted">(optional)</span></label
+                  ><textarea
+                    id="remarks"
+                    name="financialProfileRemarks"
+                    rows="3"
+                    maxlength="500"
+                    [(ngModel)]="eligibility.financialProfileRemarks"
+                  ></textarea>
+                </div>
+              </div>
+              <div class="action-row">
+                <button
+                  class="primary-button"
+                  type="submit"
+                  [disabled]="eligibilitySaving || !eligibilityForm.valid"
+                >
+                  {{ eligibilitySaving ? 'Saving…' : 'Save financial profile' }}
+                </button>
+                <button
+                  class="secondary-button"
+                  type="button"
+                  (click)="checkEligibility()"
+                  [disabled]="eligibilityChecking || !eligibilitySaved"
+                >
+                  {{ eligibilityChecking ? 'Checking…' : 'Check basic eligibility' }}
+                </button>
+              </div>
+            </form>
+          }
+          @if (eligibilityResult) {
+            <div
+              class="eligibility-result"
+              [class.eligible]="eligibilityResult.eligible"
+              [class.not-eligible]="!eligibilityResult.eligible"
+              role="status"
+            >
+              <strong>{{
+                eligibilityResult.eligible
+                  ? 'Basic eligibility criteria met'
+                  : 'Basic eligibility criteria not met'
+              }}</strong>
+              <p>{{ eligibilityResult.message }}</p>
+              <div class="result-metrics">
+                <span
+                  >Monthly income
+                  <b>{{
+                    eligibilityResult.monthlyIncome | currency: 'INR' : 'symbol' : '1.0-0'
+                  }}</b></span
+                ><span
+                  >Credit score <b>{{ eligibilityResult.creditScore }}</b></span
+                ><span
+                  >Disposable income
+                  <b>{{
+                    eligibilityResult.disposableIncome | currency: 'INR' : 'symbol' : '1.0-0'
+                  }}</b></span
+                >
+              </div>
+              <small>This is a preliminary check, not a loan approval or offer.</small>
+            </div>
+          }
+          <p class="disclaimer">
+            Eligibility results use the lender's configured basic criteria and do not guarantee loan
+            approval.
+          </p>
+        </section>
+      }
+    </main>
+  </div>
+</div>

@@ -1,0 +1,329 @@
+<div class="reports-page container-fluid py-4">
+
+  <div class="page-heading mb-4">
+    <div>
+      <h2 class="fw-bold mb-1">Payment Reports & Analytics</h2>
+      <p class="text-muted mb-0">
+        Track collections, payments, refunds and financial reports.
+      </p>
+    </div>
+
+    <div class="d-flex gap-2 flex-wrap">
+      <button class="btn btn-outline-success"
+              [disabled]="exporting"
+              (click)="exportReport('excel')">
+        Export Excel
+      </button>
+
+      <button class="btn btn-outline-danger"
+              [disabled]="exporting"
+              (click)="exportReport('pdf')">
+        Export PDF
+      </button>
+    </div>
+  </div>
+
+  <!-- Date filters -->
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+      <div class="row g-3 align-items-end">
+
+        <div class="col-md-4">
+          <label class="form-label fw-semibold">From Date</label>
+          <input type="date"
+                 class="form-control"
+                 [(ngModel)]="filter.fromDate">
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label fw-semibold">To Date</label>
+          <input type="date"
+                 class="form-control"
+                 [(ngModel)]="filter.toDate">
+        </div>
+
+        <div class="col-md-4">
+          <button class="btn btn-primary w-100"
+                  [disabled]="loading"
+                  (click)="loadReports()">
+            {{ loading ? 'Loading...' : 'Apply Filter' }}
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="errorMessage"
+       class="alert alert-danger alert-dismissible fade show">
+    {{ errorMessage }}
+    <button type="button"
+            class="btn-close"
+            (click)="errorMessage = ''"></button>
+  </div>
+
+  <!-- Dashboard -->
+  <div class="row g-3 mb-4" *ngIf="dashboard">
+
+    <div class="col-md-6 col-xl-3">
+      <div class="stat-card">
+        <div class="stat-label">Gross Collections</div>
+        <div class="stat-value">
+          {{ dashboard.grossCollections | currency:'INR' }}
+        </div>
+        <div class="stat-note">Successful payments</div>
+      </div>
+    </div>
+
+    <div class="col-md-6 col-xl-3">
+      <div class="stat-card">
+        <div class="stat-label">Net Collections</div>
+        <div class="stat-value text-success">
+          {{ dashboard.netCollections | currency:'INR' }}
+        </div>
+        <div class="stat-note">After completed refunds</div>
+      </div>
+    </div>
+
+    <div class="col-md-6 col-xl-3">
+      <div class="stat-card">
+        <div class="stat-label">Successful Payments</div>
+        <div class="stat-value">
+          {{ dashboard.successfulPayments }}
+        </div>
+        <div class="stat-note">
+          Total records: {{ dashboard.totalPayments }}
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6 col-xl-3">
+      <div class="stat-card">
+        <div class="stat-label">Pending Payments</div>
+        <div class="stat-value text-warning">
+          {{ dashboard.pendingPayments }}
+        </div>
+        <div class="stat-note">
+          Failed: {{ dashboard.failedPayments }}
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Tabs -->
+  <div class="card border-0 shadow-sm">
+
+    <div class="card-header bg-white border-0 pt-3">
+      <div class="nav nav-pills flex-wrap gap-2">
+
+        <button class="nav-link"
+                [class.active]="activeTab === 'daily'"
+                (click)="activeTab = 'daily'">
+          Daily
+        </button>
+
+        <button class="nav-link"
+                [class.active]="activeTab === 'monthly'"
+                (click)="activeTab = 'monthly'">
+          Monthly
+        </button>
+
+        <button class="nav-link"
+                [class.active]="activeTab === 'loan'"
+                (click)="activeTab = 'loan'">
+          Loan Report
+        </button>
+
+        <button class="nav-link"
+                [class.active]="activeTab === 'customer'"
+                (click)="activeTab = 'customer'">
+          Customer Report
+        </button>
+
+        <button class="nav-link"
+                [class.active]="activeTab === 'refunds'"
+                (click)="activeTab = 'refunds'">
+          Refunds
+        </button>
+
+      </div>
+    </div>
+
+    <div class="card-body">
+
+      <!-- Daily -->
+      <div *ngIf="activeTab === 'daily'">
+        <h5 class="mb-3">Daily Payment Collections</h5>
+
+        <div class="table-responsive">
+          <table class="table table-hover align-middle">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Payments</th>
+                <th>Total Collection</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of daily">
+                <td>{{ item.date | date:'dd MMM yyyy' }}</td>
+                <td>{{ item.paymentCount }}</td>
+                <td class="fw-semibold">
+                  {{ item.totalAmount | currency:'INR' }}
+                </td>
+              </tr>
+              <tr *ngIf="daily.length === 0">
+                <td colspan="3" class="text-center text-muted py-4">
+                  No daily collections found.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Monthly -->
+      <div *ngIf="activeTab === 'monthly'">
+        <h5 class="mb-3">Monthly Payment Collections</h5>
+
+        <div class="table-responsive">
+          <table class="table table-hover align-middle">
+            <thead>
+              <tr>
+                <th>Month</th>
+                <th>Year</th>
+                <th>Payments</th>
+                <th>Collection</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of monthly">
+                <td>{{ monthName(item.month) }}</td>
+                <td>{{ item.year }}</td>
+                <td>{{ item.paymentCount }}</td>
+                <td class="fw-semibold">
+                  {{ item.totalAmount | currency:'INR' }}
+                </td>
+              </tr>
+              <tr *ngIf="monthly.length === 0">
+                <td colspan="4" class="text-center text-muted py-4">
+                  No monthly collections found.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Loan report -->
+      <div *ngIf="activeTab === 'loan'">
+        <h5 class="mb-3">Loan-wise Payment Report</h5>
+
+        <div class="row g-3 align-items-end mb-4">
+          <div class="col-md-6">
+            <label class="form-label">Loan ID</label>
+            <input type="number"
+                   min="1"
+                   class="form-control"
+                   [(ngModel)]="loanId"
+                   placeholder="Enter Loan ID">
+          </div>
+          <div class="col-md-3">
+            <button class="btn btn-primary w-100"
+                    (click)="loadLoanReport()">
+              Search Loan
+            </button>
+          </div>
+        </div>
+
+        <div *ngIf="loanReport" class="result-card">
+          <p><strong>Loan ID:</strong> {{ loanReport.loanId }}</p>
+          <p><strong>Payment Count:</strong> {{ loanReport.paymentCount }}</p>
+          <p class="mb-0">
+            <strong>Total Paid:</strong>
+            {{ loanReport.totalPaid | currency:'INR' }}
+          </p>
+        </div>
+      </div>
+
+      <!-- Customer report -->
+      <div *ngIf="activeTab === 'customer'">
+        <h5 class="mb-3">Customer-wise Payment Report</h5>
+
+        <div class="row g-3 align-items-end mb-4">
+          <div class="col-md-6">
+            <label class="form-label">Customer ID</label>
+            <input type="number"
+                   min="1"
+                   class="form-control"
+                   [(ngModel)]="customerId"
+                   placeholder="Enter Customer ID">
+          </div>
+          <div class="col-md-3">
+            <button class="btn btn-primary w-100"
+                    (click)="loadCustomerReport()">
+              Search Customer
+            </button>
+          </div>
+        </div>
+
+        <div *ngIf="customerReport" class="result-card">
+          <p><strong>Customer ID:</strong> {{ customerReport.customerId }}</p>
+          <p><strong>Payment Count:</strong> {{ customerReport.paymentCount }}</p>
+          <p class="mb-0">
+            <strong>Total Paid:</strong>
+            {{ customerReport.totalPaid | currency:'INR' }}
+          </p>
+        </div>
+      </div>
+
+      <!-- Refunds -->
+      <div *ngIf="activeTab === 'refunds'">
+        <h5 class="mb-3">Refund Report</h5>
+
+        <div class="row g-3" *ngIf="refunds">
+
+          <div class="col-md-4">
+            <div class="result-card">
+              <span class="text-muted">Total Refunds</span>
+              <h3>{{ refunds.totalRefunds }}</h3>
+            </div>
+          </div>
+
+          <div class="col-md-4">
+            <div class="result-card">
+              <span class="text-muted">Pending Refunds</span>
+              <h3>{{ refunds.pendingRefunds }}</h3>
+            </div>
+          </div>
+
+          <div class="col-md-4">
+            <div class="result-card">
+              <span class="text-muted">Completed Refunds</span>
+              <h3>{{ refunds.completedRefunds }}</h3>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="result-card">
+              <span class="text-muted">Failed Refunds</span>
+              <h3>{{ refunds.failedRefunds }}</h3>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="result-card">
+              <span class="text-muted">Completed Refund Amount</span>
+              <h3>
+                {{ refunds.completedRefundAmount | currency:'INR' }}
+              </h3>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

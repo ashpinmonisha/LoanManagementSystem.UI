@@ -2,6 +2,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { signal } from '@angular/core';
 import { Observable } from 'rxjs';
 import { LoanRequest } from '../models/loan-request';
+import { API_BASE_URL } from '../core/api-url';
 
 /** Holds result, error and loading state for one API request. */
 export class ApiCall<T> {
@@ -29,7 +30,7 @@ export class ApiCall<T> {
 
 export function toMessages(e: HttpErrorResponse): string[] {
   if (e.status === 0) {
-    return ['Cannot reach the API. Make sure the backend is running on https://localhost:7085.'];
+    return [`Cannot reach the API at ${API_BASE_URL}. Make sure the backend is running and the API proxy is configured.`];
   }
   const errors = e.error?.errors;
   if (errors) return (Object.values(errors) as string[][]).flat();

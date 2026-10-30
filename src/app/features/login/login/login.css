@@ -95,3 +95,20 @@ input:focus {
   border-radius: 8px;
   font-size: 14px;
 }
+
+.customer-link {
+  margin: 12px 0 0;
+  color: #64748b;
+  font-size: 13px;
+  text-align: center;
+}
+
+.customer-link a {
+  color: #0b7b70;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.customer-link a:hover {
+  text-decoration: underline;
+}

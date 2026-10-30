@@ -1,0 +1,544 @@
+<div class="reconciliation-page container-fluid py-4">
+
+  <!-- PAGE HEADER -->
+  <div class="page-header mb-4">
+    <div>
+      <h2 class="fw-bold mb-1">
+        Payment Reconciliation
+      </h2>
+      <p class="text-muted mb-0">
+        Verify transactions and monitor payment mismatches.
+      </p>
+    </div>
+
+    <button
+      type="button"
+      class="btn btn-outline-primary"
+      [disabled]="reportLoading || loading"
+      (click)="loadReport()">
+      Refresh Dashboard
+    </button>
+  </div>
+
+  <!-- ALERTS -->
+  <div
+    *ngIf="errorMessage"
+    class="alert alert-danger alert-dismissible">
+    {{ errorMessage }}
+    <button
+      type="button"
+      class="btn-close"
+      aria-label="Close"
+      (click)="errorMessage = ''">
+    </button>
+  </div>
+
+  <div
+    *ngIf="successMessage"
+    class="alert alert-success">
+    {{ successMessage }}
+  </div>
+
+  <!-- DASHBOARD SUMMARY -->
+  <div class="row g-3 mb-4">
+
+    <div class="col-6 col-xl-3">
+      <div class="summary-card">
+        <div class="summary-label">
+          Payments Checked
+        </div>
+        <div class="summary-value">
+          {{ report?.totalPaymentsChecked ?? '—' }}
+        </div>
+        <div class="summary-description">
+          Latest result per payment
+        </div>
+      </div>
+    </div>
+
+    <div class="col-6 col-xl-3">
+      <div class="summary-card">
+        <div class="summary-label">
+          Matched
+        </div>
+        <div class="summary-value text-success">
+          {{ report?.matched ?? '—' }}
+        </div>
+        <div class="summary-description">
+          Verified transactions
+        </div>
+      </div>
+    </div>
+
+    <div class="col-6 col-xl-3">
+      <div class="summary-card">
+        <div class="summary-label">
+          Amount Mismatches
+        </div>
+        <div class="summary-value text-danger">
+          {{ report?.amountMismatches ?? '—' }}
+        </div>
+        <div class="summary-description">
+          Different transaction amounts
+        </div>
+      </div>
+    </div>
+
+    <div class="col-6 col-xl-3">
+      <div class="summary-card">
+        <div class="summary-label">
+          Pending
+        </div>
+        <div class="summary-value text-warning">
+          {{ report?.pending ?? '—' }}
+        </div>
+        <div class="summary-description">
+          Awaiting gateway completion
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- OTHER REPORT COUNTS -->
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+      <h5 class="fw-bold mb-3">
+        Reconciliation Summary
+      </h5>
+
+      <div class="row g-3">
+        <div class="col-md-3 col-6">
+          <div class="metric-label">Status Mismatch</div>
+          <div class="metric-value">
+            {{ report?.statusMismatches ?? '—' }}
+          </div>
+        </div>
+
+        <div class="col-md-3 col-6">
+          <div class="metric-label">Duplicate References</div>
+          <div class="metric-value">
+            {{ report?.duplicateReferences ?? '—' }}
+          </div>
+        </div>
+
+        <div class="col-md-3 col-6">
+          <div class="metric-label">Gateway Not Found</div>
+          <div class="metric-value">
+            {{ report?.gatewayNotFound ?? '—' }}
+          </div>
+        </div>
+
+        <div class="col-md-3 col-6">
+          <div class="metric-label">Invalid References</div>
+          <div class="metric-value">
+            {{ report?.invalidReferences ?? '—' }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="card border-0 shadow-sm">
+
+    <div class="card-header bg-white border-0 pt-3">
+      <div class="nav nav-pills gap-2 flex-wrap">
+
+        <button
+          type="button"
+          class="nav-link"
+          [class.active]="activeTab === 'verify'"
+          (click)="setTab('verify')">
+          Verify Payment
+        </button>
+
+        <button
+          type="button"
+          class="nav-link"
+          [class.active]="activeTab === 'bulk'"
+          (click)="setTab('bulk')">
+          Bulk Reconciliation
+        </button>
+
+        <button
+          type="button"
+          class="nav-link"
+          [class.active]="activeTab === 'history'"
+          (click)="setTab('history')">
+          History
+        </button>
+
+        <button
+          type="button"
+          class="nav-link"
+          [class.active]="activeTab === 'mismatches'"
+          (click)="setTab('mismatches')">
+          Mismatches
+        </button>
+
+      </div>
+    </div>
+
+    <div class="card-body p-4">
+
+      <!-- VERIFY PAYMENT -->
+      <section *ngIf="activeTab === 'verify'">
+
+        <h5 class="fw-bold">Verify Individual Payment</h5>
+
+        <p class="text-muted">
+          Compare a database payment with its Razorpay transaction.
+        </p>
+
+        <form
+          class="row g-3 align-items-end"
+          (ngSubmit)="verifyPayment()">
+
+          <div class="col-md-6">
+            <label class="form-label">Payment ID</label>
+            <input
+              type="number"
+              name="paymentId"
+              class="form-control"
+              [(ngModel)]="paymentId"
+              min="1"
+              step="1"
+              placeholder="Example: 15"
+              required>
+          </div>
+
+          <div class="col-md-3">
+            <button
+              type="submit"
+              class="btn btn-primary w-100"
+              [disabled]="loading">
+              {{ loading ? 'Verifying...' : 'Verify Payment' }}
+            </button>
+          </div>
+
+        </form>
+
+        <!-- RESULT -->
+        <div
+          *ngIf="latestResult as result"
+          class="result-panel mt-4">
+
+          <div class="d-flex justify-content-between
+                      align-items-center flex-wrap gap-2 mb-3">
+            <h6 class="fw-bold mb-0">
+              Latest Verification Result
+            </h6>
+
+            <span
+              class="badge"
+              [ngClass]="getBadgeClass(result.result)">
+              {{ getResultLabel(result.result) }}
+            </span>
+          </div>
+
+          <div class="row g-3">
+
+            <div class="col-md-4">
+              <div class="detail-label">Payment ID</div>
+              <strong>{{ result.paymentId }}</strong>
+            </div>
+
+            <div class="col-md-4">
+              <div class="detail-label">Loan ID</div>
+              <strong>{{ result.loanId }}</strong>
+            </div>
+
+            <div class="col-md-4">
+              <div class="detail-label">Reference</div>
+              <strong class="text-break">
+                {{ result.paymentReference }}
+              </strong>
+            </div>
+
+            <div class="col-md-4">
+              <div class="detail-label">Database Amount</div>
+              <strong>
+                {{ result.databaseAmount | currency:'INR' }}
+              </strong>
+            </div>
+
+            <div class="col-md-4">
+              <div class="detail-label">Gateway Amount</div>
+              <strong>
+                {{
+                  result.gatewayAmount === null
+                    ? 'Not available'
+                    : (result.gatewayAmount | currency:'INR')
+                }}
+              </strong>
+            </div>
+
+            <div class="col-md-4">
+              <div class="detail-label">Checked At</div>
+              <strong>
+                {{ result.reconciledAt | date:'medium' }}
+              </strong>
+            </div>
+
+            <div class="col-md-6">
+              <div class="detail-label">Database Status</div>
+              <strong>{{ result.databaseStatus }}</strong>
+            </div>
+
+            <div class="col-md-6">
+              <div class="detail-label">Gateway Status</div>
+              <strong>
+                {{ result.gatewayStatus || 'Not available' }}
+              </strong>
+            </div>
+
+            <div class="col-12">
+              <div class="detail-label">Remarks</div>
+              <p class="mb-0">{{ result.remarks }}</p>
+            </div>
+
+          </div>
+        </div>
+
+      </section>
+
+      <!-- BULK RECONCILIATION -->
+      <section *ngIf="activeTab === 'bulk'">
+
+        <h5 class="fw-bold">Bulk Reconciliation</h5>
+
+        <p class="text-muted">
+          Verify the latest payments against Razorpay.
+          Maximum 100 payments per request.
+        </p>
+
+        <form
+          class="row g-3 align-items-end"
+          (ngSubmit)="runBulk()">
+
+          <div class="col-md-5">
+            <label class="form-label">Number of Payments</label>
+            <input
+              type="number"
+              name="bulkLimit"
+              class="form-control"
+              [(ngModel)]="bulkLimit"
+              min="1"
+              max="100"
+              step="1"
+              required>
+          </div>
+
+          <div class="col-md-4">
+            <button
+              type="submit"
+              class="btn btn-primary w-100"
+              [disabled]="loading">
+              {{
+                loading
+                  ? 'Processing...'
+                  : 'Run Reconciliation'
+              }}
+            </button>
+          </div>
+
+        </form>
+
+        <div class="table-responsive mt-4">
+          <table class="table table-hover align-middle">
+            <thead>
+              <tr>
+                <th>Payment ID</th>
+                <th>Reference</th>
+                <th>Database Amount</th>
+                <th>Gateway Amount</th>
+                <th>Result</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr *ngFor="let item of bulkResults">
+                <td>{{ item.paymentId }}</td>
+                <td>{{ item.paymentReference }}</td>
+                <td>
+                  {{ item.databaseAmount | currency:'INR' }}
+                </td>
+                <td>
+                  {{
+                    item.gatewayAmount === null
+                      ? '—'
+                      : (item.gatewayAmount | currency:'INR')
+                  }}
+                </td>
+                <td>
+                  <span
+                    class="badge"
+                    [ngClass]="getBadgeClass(item.result)">
+                    {{ getResultLabel(item.result) }}
+                  </span>
+                </td>
+              </tr>
+
+              <tr *ngIf="bulkResults.length === 0">
+                <td colspan="5" class="empty-state">
+                  No bulk reconciliation results loaded.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+      </section>
+
+      <!-- HISTORY -->
+      <section *ngIf="activeTab === 'history'">
+
+        <h5 class="fw-bold">Reconciliation History</h5>
+
+        <p class="text-muted">
+          View previous reconciliation checks for a payment.
+        </p>
+
+        <form
+          class="row g-3 align-items-end"
+          (ngSubmit)="loadHistory()">
+
+          <div class="col-md-6">
+            <label class="form-label">Payment ID</label>
+            <input
+              type="number"
+              name="historyPaymentId"
+              class="form-control"
+              [(ngModel)]="historyPaymentId"
+              min="1"
+              step="1"
+              required>
+          </div>
+
+          <div class="col-md-3">
+            <button
+              type="submit"
+              class="btn btn-primary w-100"
+              [disabled]="loading">
+              Search History
+            </button>
+          </div>
+
+        </form>
+
+        <div class="table-responsive mt-4">
+          <table class="table table-hover align-middle">
+            <thead>
+              <tr>
+                <th>Reconciliation ID</th>
+                <th>Payment ID</th>
+                <th>Result</th>
+                <th>Remarks</th>
+                <th>Checked At</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr *ngFor="let item of history">
+                <td>{{ item.reconciliationId }}</td>
+                <td>{{ item.paymentId }}</td>
+                <td>
+                  <span
+                    class="badge"
+                    [ngClass]="getBadgeClass(item.result)">
+                    {{ getResultLabel(item.result) }}
+                  </span>
+                </td>
+                <td>{{ item.remarks }}</td>
+                <td>
+                  {{ item.reconciledAt | date:'medium' }}
+                </td>
+              </tr>
+
+              <tr *ngIf="history.length === 0">
+                <td colspan="5" class="empty-state">
+                  No history records loaded.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+      </section>
+
+      <!-- MISMATCHES -->
+      <section *ngIf="activeTab === 'mismatches'">
+
+        <div class="d-flex justify-content-between
+                    align-items-center flex-wrap gap-2">
+
+          <div>
+            <h5 class="fw-bold">Unresolved Reconciliation Results</h5>
+            <p class="text-muted mb-0">
+              Latest non-matched result for each checked payment.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            class="btn btn-outline-primary"
+            [disabled]="loading"
+            (click)="loadMismatches()">
+            Refresh
+          </button>
+
+        </div>
+
+        <div class="table-responsive mt-4">
+          <table class="table table-hover align-middle">
+            <thead>
+              <tr>
+                <th>Payment ID</th>
+                <th>Reference</th>
+                <th>Database Amount</th>
+                <th>Gateway Amount</th>
+                <th>Result</th>
+                <th>Remarks</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr *ngFor="let item of mismatches">
+                <td>{{ item.paymentId }}</td>
+                <td>{{ item.paymentReference }}</td>
+                <td>
+                  {{ item.databaseAmount | currency:'INR' }}
+                </td>
+                <td>
+                  {{
+                    item.gatewayAmount === null
+                      ? '—'
+                      : (item.gatewayAmount | currency:'INR')
+                  }}
+                </td>
+                <td>
+                  <span
+                    class="badge"
+                    [ngClass]="getBadgeClass(item.result)">
+                    {{ getResultLabel(item.result) }}
+                  </span>
+                </td>
+                <td>{{ item.remarks }}</td>
+              </tr>
+
+              <tr *ngIf="mismatches.length === 0">
+                <td colspan="6" class="empty-state">
+                  No non-matched results found.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+      </section>
+
+    </div>
+  </div>
+
+</div>

@@ -1,5 +1,7 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpContext } from '@angular/common/http';
+import { CUSTOMER_PORTAL_REQUEST } from '../customer-portal-request';
+import { API_BASE_URL } from '../api-url';
 
 export interface CreateOrderRequest {
   customerId: number;
@@ -45,19 +47,21 @@ export class RazorpayService {
 
   private http = inject(HttpClient);
 
-  private api = 'https://localhost:7085/api/Razorpay';
+  private readonly api = `${API_BASE_URL}/Razorpay`;
 
-  createOrder(data: CreateOrderRequest) {
+  createOrder(data: CreateOrderRequest, customerPortal = false) {
     return this.http.post<RazorpayOrder>(
       `${this.api}/create-order`,
-      data
+      data,
+      customerPortal ? { context: new HttpContext().set(CUSTOMER_PORTAL_REQUEST, true) } : {},
     );
   }
 
-  verifyPayment(data: VerifyPaymentRequest) {
+  verifyPayment(data: VerifyPaymentRequest, customerPortal = false) {
     return this.http.post<VerifyPaymentResponse>(
       `${this.api}/verify`,
-      data
+      data,
+      customerPortal ? { context: new HttpContext().set(CUSTOMER_PORTAL_REQUEST, true) } : {},
     );
   }
 

@@ -1,4 +1,2 @@
-import { isDevMode } from '@angular/core';
-
-// The development server forwards same-origin requests to the local API.
-export const API_BASE_URL = isDevMode() ? '/api' : 'https://localhost:7085/api';
+// Keep API calls same-origin; Angular dev server and production hosting proxy /api to the backend.
+export const API_BASE_URL = '/api';

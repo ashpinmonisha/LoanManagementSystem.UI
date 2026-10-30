@@ -1,0 +1,178 @@
+<div class="container py-4 receipt-page">
+
+  <div class="mb-4">
+    <h2 class="fw-bold">Payment Receipt Management</h2>
+    <p class="text-muted">
+      Generate, view and download payment receipts
+    </p>
+  </div>
+
+  <div *ngIf="error" class="alert alert-danger">
+    {{ error }}
+  </div>
+
+  <div *ngIf="success" class="alert alert-success">
+    {{ success }}
+  </div>
+
+  <div class="card shadow-sm mb-4">
+    <div class="card-body">
+      <h5 class="mb-3">Generate Payment Receipt</h5>
+
+      <label class="form-label">Payment ID</label>
+
+      <input
+        type="number"
+        class="form-control mb-3"
+        [(ngModel)]="paymentId"
+        placeholder="Enter completed Payment ID"
+        min="1"
+      />
+
+      <div class="d-flex flex-wrap gap-2">
+        <button
+          class="btn btn-primary"
+          [disabled]="loading"
+          (click)="generateReceipt()">
+          Generate Receipt
+        </button>
+
+        <button
+          class="btn btn-outline-primary"
+          [disabled]="loading"
+          (click)="viewReceipt()">
+          View Existing Receipt
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="receipt" class="card receipt-card shadow-sm mb-4">
+    <div class="card-body p-4">
+
+      <div class="text-center mb-4">
+        <h3>LOAN MANAGEMENT SYSTEM</h3>
+        <p class="text-muted mb-1">PAYMENT RECEIPT</p>
+        <span class="badge bg-success">COMPLETED</span>
+      </div>
+
+      <hr />
+
+      <div class="row g-3">
+        <div class="col-md-6">
+          <strong>Receipt Number</strong>
+          <p>{{ receipt.receiptNumber }}</p>
+        </div>
+
+        <div class="col-md-6">
+          <strong>Payment ID</strong>
+          <p>{{ receipt.paymentId }}</p>
+        </div>
+
+        <div class="col-md-6">
+          <strong>Customer ID</strong>
+          <p>{{ receipt.customerId }}</p>
+        </div>
+
+        <div class="col-md-6">
+          <strong>Loan ID</strong>
+          <p>{{ receipt.loanId }}</p>
+        </div>
+
+        <div class="col-md-6">
+          <strong>Payment Method</strong>
+          <p>{{ receipt.paymentMethod }}</p>
+        </div>
+
+        <div class="col-md-6">
+          <strong>Payment Date</strong>
+          <p>{{ receipt.paymentDate | date:'dd MMM yyyy' }}</p>
+        </div>
+
+        <div class="col-12">
+          <strong>Transaction Reference</strong>
+          <p>{{ receipt.paymentReference }}</p>
+        </div>
+      </div>
+
+      <div class="amount-box text-center my-4">
+        <p class="mb-1">Total Amount Paid</p>
+        <h2>
+          {{ receipt.amount | currency:'INR':'symbol':'1.2-2' }}
+        </h2>
+      </div>
+
+      <button
+        class="btn btn-success w-100"
+        (click)="downloadReceipt(receipt.paymentId)">
+        Download PDF Receipt
+      </button>
+
+    </div>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <h5 class="mb-3">Receipt History</h5>
+
+      <div class="d-flex gap-2 mb-3">
+        <input
+          type="number"
+          class="form-control"
+          [(ngModel)]="loanId"
+          placeholder="Enter Loan ID"
+          min="1"
+        />
+
+        <button
+          class="btn btn-primary"
+          [disabled]="loading"
+          (click)="loadHistory()">
+          Search
+        </button>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table table-hover align-middle">
+          <thead>
+            <tr>
+              <th>Receipt No.</th>
+              <th>Payment ID</th>
+              <th>Amount</th>
+              <th>Date</th>
+              <th>Download</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr *ngFor="let item of receipts">
+              <td>{{ item.receiptNumber }}</td>
+              <td>{{ item.paymentId }}</td>
+              <td>
+                {{ item.amount | currency:'INR' }}
+              </td>
+              <td>
+                {{ item.paymentDate | date:'dd MMM yyyy' }}
+              </td>
+              <td>
+                <button
+                  class="btn btn-sm btn-outline-success"
+                  (click)="downloadReceipt(item.paymentId)">
+                  PDF
+                </button>
+              </td>
+            </tr>
+
+            <tr *ngIf="receipts.length === 0">
+              <td colspan="5" class="text-center text-muted py-3">
+                No receipts loaded
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+
+</div>
